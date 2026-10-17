@@ -1,0 +1,58 @@
+[project]
+name = "yolo-depth-underwater"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "AndreFGard", email = "96950645+AndreFGard@users.noreply.github.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "ultralytics>=8.4.175",
+]
+
+[project.optional-dependencies]
+rocm = [
+    "torch==2.8.0",
+    "torchvision==0.23.0",
+    "pytorch-triton-rocm>=3.4.0 ; sys_platform == 'linux'",
+]
+cu = [
+    "torch>=2.8.0",
+    "torchvision>=0.23.0",
+]
+
+[tool.uv]
+conflicts = [
+    [{ extra = "rocm" }, { extra = "cu" }],
+]
+
+[[tool.uv.index]]
+name = "pytorch-rocm"
+url = "https://download.pytorch.org/whl/rocm6.4"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-rocm", extra = "rocm" },
+]
+torchvision = [
+    { index = "pytorch-rocm", extra = "rocm" },
+]
+pytorch-triton-rocm = [
+    { index = "pytorch-rocm", extra = "rocm" },
+]
+
+[project.scripts]
+yolo-underwater = "yolo_underwater:main"
+
+[build-system]
+requires = ["uv_build>=0.12.24,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "jupyterlab>=4.6.4",
+    "tdqm>=0.0.1",
+]

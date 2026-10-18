@@ -54,5 +54,7 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "ipykernel>=7.4.0",
-    "jupyterlab>=4.6.4"
+    "jupyterlab>=4.6.4",
+    "plotly"
+
 ]

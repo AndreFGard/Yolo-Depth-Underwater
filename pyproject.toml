@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "tqdm",
     "ultralytics>=8.4.175",
 ]
 
@@ -53,6 +54,5 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "ipykernel>=7.4.0",
-    "jupyterlab>=4.6.4",
-    "tdqm>=0.0.1",
+    "jupyterlab>=4.6.4"
 ]

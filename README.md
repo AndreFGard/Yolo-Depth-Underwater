@@ -8,7 +8,11 @@ On colab, import your notebook or similar and setup the git repo:
 ```bash
 !git clone https://github.com/AndreFGard/Yolo-Depth-Underwater.git
 %cd Yolo-Depth-Underwater
-!uv pip install --system -e ".[cu]"
+!pip install -e ".[cu]"
+import sys
+import os
+sys.path.append(os.path.abspath('src'))
+
 import yolo_depth_underwater
 ```
 

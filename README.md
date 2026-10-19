@@ -15,6 +15,7 @@ import yolo_depth_underwater
 # Docs
 
 ## Setup
+Install git lfs.
 
 To support both AMD and Nvidia gpus, you must **always** use uv --extra so it doesnt overwrite the packages for your specific hardware.
 ### AMD GPUs (ROCm)

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 - Ignores the saliency
 - annotations.json  has an empty annotations list, it only has depth files for each image.

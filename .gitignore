@@ -9,4 +9,8 @@ datasets/
 yolo/
 # Virtual environments
 .venv
-uv.locksw
+uv.lock
+.env
+report/main.pdf
+.vscode/
+report/fonts

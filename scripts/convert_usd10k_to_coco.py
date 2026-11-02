@@ -82,9 +82,7 @@ def hardlink_images(usod10k_rgb: Path, dest_img: Path) -> None:
         try:
             os.link(str(f), str(dst))
         except OSError as exc:
-            raise RuntimeError(
-                f"hardlink failed for {f} -> {dst}: {exc}"
-            ) from exc
+            raise RuntimeError(f"hardlink failed for {f} -> {dst}: {exc}") from exc
 
 
 def convert_disparity_maps(usod10k_depth: Path, dest_depth: Path, eps: float) -> None:
@@ -105,12 +103,16 @@ def convert_disparity_maps(usod10k_depth: Path, dest_depth: Path, eps: float) ->
     with ProcessPoolExecutor(max_workers=workers) as ex:
         for _ in tqdm(
             ex.map(_convert_disparity_to_depth, jobs, chunksize=32),
-            total=len(jobs), unit="map", desc="disparity",
+            total=len(jobs),
+            unit="map",
+            desc="disparity",
         ):
             pass
 
 
-def collect_split_images(dest_img: Path, split_name: str, id_seq: Iterator[int]) -> list[COCOImage]:
+def collect_split_images(
+    dest_img: Path, split_name: str, id_seq: Iterator[int]
+) -> list[COCOImage]:
     """Collect COCO image entries for one split, assigning sequential ids."""
     images: list[COCOImage] = []
     if not dest_img.is_dir():
@@ -188,22 +190,30 @@ source:
   url: https://github.com/DCCover/USOD10k
   gt_nature: DPT monocular-network pseudo-depth (per-image min-max normalized
     disparity), not sensor-captured. Cross-image comparisons are meaningless.
-  splits: {{train: {sizes.get('train', 0)}, val: {sizes.get('val', 0)}, test: {sizes.get('test', 0)}}}
+  splits: {{train: {sizes.get("train", 0)}, val: {sizes.get("val", 0)}, test: {sizes.get("test", 0)}}}
 """
     yaml_path.write_text(content)
     LOGGER.info("wrote data.yaml: %s", yaml_path)
 
 
-def run_pipeline(usod10k_root: Path, output_root: Path, eps: float, yaml_path: Path) -> None:
+def run_pipeline(
+    usod10k_root: Path, output_root: Path, eps: float, yaml_path: Path
+) -> None:
     """Orchestrate the full USOD10k -> COCO-depth conversion."""
     all_images: list[COCOImage] = []
     sizes: dict[str, int] = {}
     id_seq = count(1)
 
     for split_key, split_name in SPLIT_MAP.items():
-        hardlink_images(usod10k_root / split_key / "RGB", output_root / "images" / split_name)
-        convert_disparity_maps(usod10k_root / split_key / "depth", output_root / "depth" / split_name, eps)
-        split_images = collect_split_images(output_root / "images" / split_name, split_name, id_seq)
+        hardlink_images(
+            usod10k_root / split_key / "RGB", output_root / "images" / split_name
+        )
+        convert_disparity_maps(
+            usod10k_root / split_key / "depth", output_root / "depth" / split_name, eps
+        )
+        split_images = collect_split_images(
+            output_root / "images" / split_name, split_name, id_seq
+        )
         all_images.extend(split_images)
         sizes[split_name] = len(split_images)
 
@@ -216,10 +226,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    p.add_argument("--usod10k-root", type=Path, required=True,
-                    help="Root of extracted USOD10k")
-    p.add_argument("--output-root", type=Path, required=True,
-                    help="Destination for the COCO-depth dataset")
+    p.add_argument(
+        "--usod10k-root", type=Path, required=True, help="Root of extracted USOD10k"
+    )
+    p.add_argument(
+        "--output-root",
+        type=Path,
+        required=True,
+        help="Destination for the COCO-depth dataset",
+    )
     return p.parse_args(argv)
 
 
@@ -233,8 +248,12 @@ def main(argv: list[str] | None = None) -> int:
     eps = DEFAULT_EPS
     yaml_path = cfg.output_root / "data.yaml"
 
-    LOGGER.info("USOD10k -> COCO-depth: %s -> %s with eps=%.2f",
-                cfg.usod10k_root, cfg.output_root, eps)
+    LOGGER.info(
+        "USOD10k -> COCO-depth: %s -> %s with eps=%.2f",
+        cfg.usod10k_root,
+        cfg.output_root,
+        eps,
+    )
 
     run_pipeline(cfg.usod10k_root, cfg.output_root, eps, yaml_path)
 

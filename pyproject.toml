@@ -23,6 +23,10 @@ cu = [
     "torchvision>=0.23.0",
 ]
 
+unidepth = [
+    "unidepth",
+]
+
 [tool.uv]
 conflicts = [
     [{ extra = "rocm" }, { extra = "cu" }],
@@ -43,6 +47,7 @@ torchvision = [
 pytorch-triton-rocm = [
     { index = "pytorch-rocm", extra = "rocm" },
 ]
+unidepth = { path = "3rd_party/unidepth", editable = true }
 
 [project.scripts]
 yolo-underwater = "yolo_underwater:main"

@@ -20,10 +20,10 @@ def render_depth_img(depth: np.ndarray | pathlib.Path) -> np.ndarray:
     return cv2.cvtColor(color, cv2.COLOR_BGR2RGB)
 
 
-def render_depth_images_in_grid(
+def render_images_in_grid(
     images: list[np.ndarray],
     titles: list[str] | None = None,
-    cols: int = 1,
+    cols: int = 2,
     width: float = 4.0,
     h_per_img: float = 2.0,
 ) -> Figure:
@@ -41,7 +41,7 @@ def render_depth_images_in_grid(
     if titles is None:
         titles = [f"{i}" for i in range(n)]
     for ax, depth, title in zip(axes.flat, images, titles):
-        ax.imshow(render_depth_img(depth))
+        ax.imshow(depth)
         ax.set_title(title, fontsize=10)
         ax.set_axis_off()
     for ax in axes.flat[n:]:

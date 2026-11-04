@@ -3,6 +3,7 @@
 from enum import StrEnum
 from typing import Any
 
+
 class Split(StrEnum):
     """Dataset split selector; values match the keys of an Ultralytics data YAML."""
 

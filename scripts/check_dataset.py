@@ -52,7 +52,7 @@ def main() -> int:
             desc=split.value,
             unit="img",
         ):
-            valid = s.valid_mask
+            valid = s.valid_depth_mask
             if valid.any():
                 per_image.append(np.percentile(s.depth[valid], [25, 50, 75]))
             else:

@@ -44,6 +44,6 @@ def render_depth_images_in_grid(
         ax.imshow(render_depth_img(depth))
         ax.set_title(title, fontsize=10)
         ax.set_axis_off()
-    for ax in axes.flat[n:]: 
+    for ax in axes.flat[n:]:
         ax.set_axis_off()
     return fig

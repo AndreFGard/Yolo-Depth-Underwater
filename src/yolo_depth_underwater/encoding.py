@@ -9,6 +9,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from ultralytics.data.utils import load_depth
 
 DEPTH_SCALE = 1000.0  # Ultralytics' default: uint16 PNG value = depth * scale
 MAX_ENCODABLE = 65535 / DEPTH_SCALE  # 65.535 m, the uint16 ceiling at scale 1000
@@ -31,8 +32,7 @@ def to_uint16(depth: np.ndarray, scale: float = DEPTH_SCALE) -> np.ndarray:
 def save_depth_png(
     path: str | Path, depth: np.ndarray, scale: float = DEPTH_SCALE
 ) -> Path:
-    """Save float depth as a scaled uint16 PNG, creating parent directories. MUST be used to avoid automatic quantization to u8 when imwriting
-    """
+    """Save float depth meters as a scaled uint16 PNG."""
     depth = np.asarray(depth, dtype=np.float32)
     ceiling = 65535 / scale
     too_far = np.count_nonzero(np.isfinite(depth) & (depth > ceiling))
@@ -53,3 +53,8 @@ def save_depth_png(
     path.parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(to_uint16(depth, scale)).save(path, format="PNG")
     return path
+
+
+def load_depth_img(path: str | Path, scale: float = DEPTH_SCALE) -> np.ndarray:
+    """Load a scaled uint16 depth PNG as float32 **meters** (0 = invalid)"""
+    return load_depth(Path(path), scale)

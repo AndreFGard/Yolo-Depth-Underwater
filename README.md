@@ -18,6 +18,11 @@ import yolo_depth_underwater
 
 # Docs
 
+## Other
+- Do not use cv2.imread or imwrite, because it may quantize the uint16 maps into uint8. Instead, use encoding.py's utils.
+- Raw depth maps may have very small variance and therefore be near impossibe to discern. Use visualization.py utils instead.
+
+
 ## Setup
 Install git lfs.
 

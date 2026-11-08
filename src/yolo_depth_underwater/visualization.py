@@ -7,13 +7,23 @@ import numpy as np
 import ultralytics.utils.plotting
 from matplotlib.figure import Figure
 
+from yolo_depth_underwater.encoding import load_depth_img
+
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif", ".webp"}
 
 
 def render_depth_img(depth: np.ndarray | pathlib.Path) -> np.ndarray:
+    """Colourize a depth map for human inspection (returns RGB uint8).
+
+    Accepts float32 metres, or a path to a scaled uint16 depth PNG. This is the
+    only supported way to *look* at depth — see ``yolo_depth_underwater.encoding``
+    for why the raw buffer must never be shown directly.
+
+    Note: the normalisation is per image, so the output carries no absolute
+    scale. A good-looking render does NOT prove the depth values are correct.
+    """
     if isinstance(depth, pathlib.Path):
-        depth = cv2.imread(str(depth))  # pyright: ignore[reportAssignmentType]
-        assert depth is not None
+        depth = load_depth_img(depth)
     MODE = "disparity"
     depth = np.asarray(depth, dtype=np.float32)
     color = ultralytics.utils.plotting.colorize_depth(depth, mode=MODE)

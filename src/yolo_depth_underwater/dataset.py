@@ -4,10 +4,10 @@ from collections.abc import Iterator
 from pathlib import Path
 import ultralytics.data.dataset
 from ultralytics.cfg import get_cfg
-from ultralytics.data.utils import check_det_dataset, load_depth
+from ultralytics.data.utils import check_det_dataset
 from ultralytics.utils.patches import imread
 
-from yolo_depth_underwater.encoding import DEPTH_SCALE
+from yolo_depth_underwater.encoding import DEPTH_SCALE, load_depth_img
 from yolo_depth_underwater.sample import DepthSample
 from yolo_depth_underwater.split import Split
 
@@ -77,7 +77,7 @@ class DepthDataset:
         image = imread(im_file)
         if image is None:
             raise FileNotFoundError(f"Could not read image {im_file}")
-        depth = load_depth(depth_file, ds.data.get("depth_scale", DEPTH_SCALE))
+        depth = load_depth_img(depth_file, ds.data.get("depth_scale", DEPTH_SCALE))
         return DepthSample(split, index, image, depth, Path(im_file), Path(depth_file))
 
     def depth_samples(self, split: Split) -> Iterator[DepthSample]:

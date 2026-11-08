@@ -41,7 +41,7 @@ def main() -> int:
 
     rows = []
     for split in args.splits:
-        if not data.data.get(split.value):
+        if not data._data.get(split.value):
             continue
         # one (p25, p50, p75) triple per image, over that image's valid pixels.
         per_image = []

@@ -27,13 +27,12 @@ class DepthDataset:
         self,
         data_yaml: str | Path,
         imgsz: int = 640,
-        cache: str | None = None,
         fraction: float = 1.0,
     ):
-        self.data_yaml = Path(data_yaml)
-        self.data = check_det_dataset(str(self.data_yaml))
-        self.cfg = get_cfg(overrides={"task": "depth", "imgsz": imgsz, "cache": cache})
-        self.fraction = fraction
+        self._data_yaml = Path(data_yaml)
+        self.data = check_det_dataset(str(self._data_yaml))
+        self._cfg = get_cfg(overrides={"task": "depth", "imgsz": imgsz, "cache": False})
+        self._fraction = fraction
         self._datasets: dict[Split, ultralytics.data.dataset.DepthDataset] = {}
 
     def _dataset(self, split: Split) -> ultralytics.data.dataset.DepthDataset:
@@ -42,17 +41,17 @@ class DepthDataset:
             img_path = self.data.get(split.value)
             if not img_path:
                 raise KeyError(
-                    f"Split {split.value!r} is not defined in {self.data_yaml}"
+                    f"Split {split.value!r} is not defined in {self._data_yaml}"
                 )
             self._datasets[split] = ultralytics.data.dataset.DepthDataset(
                 img_path=img_path,
                 data=self.data,
                 task="depth",
-                imgsz=self.cfg.imgsz,
+                imgsz=self._cfg.imgsz,
                 augment=False,
-                hyp=self.cfg,
-                cache=self.cfg.cache or None,
-                fraction=self.fraction,
+                hyp=self._cfg,
+                cache=False,
+                fraction=self._fraction,
                 prefix=f"{split.value}: ",
             )
         return self._datasets[split]

@@ -40,8 +40,10 @@ def render_images_in_grid(
     )
     if titles is None:
         titles = [f"{i}" for i in range(n)]
-    for ax, depth, title in zip(axes.flat, images, titles):
-        ax.imshow(depth)
+    for ax, img, title in zip(axes.flat, images, titles):
+        if img.ndim == 2:
+            img = render_depth_img(img)
+        ax.imshow(img)
         ax.set_title(title, fontsize=10)
         ax.set_axis_off()
     for ax in axes.flat[n:]:

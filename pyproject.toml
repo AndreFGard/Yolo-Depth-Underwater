@@ -27,6 +27,9 @@ unidepth = [
     "unidepth",
 ]
 
+flsea = ["kagglehub", "kaggle>=1.7", "tifffile", "imagecodecs"]
+depth-anything = ["transformers>=4.45"]
+
 [tool.uv]
 conflicts = [
     [{ extra = "rocm" }, { extra = "cu" }],

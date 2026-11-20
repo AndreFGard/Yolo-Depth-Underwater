@@ -32,11 +32,13 @@ Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
   otherwise the output is treated as depth.
 * Per-image oracle alignment in disparity space: `ssi` (scale + shift, least squares) and `median` (scale only);
   aligned disparity is clipped to >= 1/20 m and inverted. The same is applied to every model, metric ones included.
-  `--include-raw` also scores metric models without alignment.
+  The per-image scale fit means these scores measure **structure only**: they cannot detect wrong absolute scale
+  or frame-to-frame scale drift. `--include-raw` scores metric models without alignment.
 * `constant` = best flat map; a model must beat it.
 * Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog (lambda = 0.85), on valid pixels.
 * Oracle alignment uses the reference, so numbers are an upper bound for relative models and are **not comparable**
-  with the arXiv:2507.02148 tables (no alignment there; only the sequence choice is shared).
+  with the arXiv:2507.02148 tables (no alignment there; only the sequence choice is shared). For claims about
+  physical meters, use `--include-raw` (possibly after calibrating on a separate split), not the aligned rows.
 
 ## Reference numbers (Depth Anything V2 Small, zero-shot, Colab T4)
 | subset | alignment | AbsRel | RMSE | d1 | d2 | d3 | SILog |

@@ -31,7 +31,7 @@ class DepthDataset:
     ):
         self._data_yaml = Path(data_yaml)
         self.data = check_det_dataset(str(self._data_yaml))
-        self._cfg = get_cfg(overrides={"task": "depth", "imgsz": imgsz, "cache": False})
+        self._cfg = get_cfg(overrides={"task": "depth", "imgsz": imgsz, "cache": True})
         self._fraction = fraction
         self._datasets: dict[Split, ultralytics.data.dataset.DepthDataset] = {}
 
@@ -50,7 +50,7 @@ class DepthDataset:
                 imgsz=self._cfg.imgsz,
                 augment=False,
                 hyp=self._cfg,
-                cache=False,
+                cache=True,
                 fraction=self._fraction,
                 prefix=f"{split.value}: ",
             )

@@ -1,2 +1,2 @@
 Model,AbsRel↓,RMSE↓,δ₁↑,SILog↓
-UniDepth V2 (ViT-L),0.0465,0.4844,0.9803,8.1189
+UniDepth V2 (ViT-L),0.0468,0.5385,0.9793,8.4369

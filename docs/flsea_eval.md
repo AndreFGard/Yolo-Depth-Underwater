@@ -1,7 +1,8 @@
 # FLSea evaluation
 
-Scores any `InferenceModel` on the same 240 FLSea-VI frames (20 per sequence, 12 sequences,
-evenly spaced in time) with the same protocol, so models can go in one table.
+Scores any `InferenceModel` on the same FLSea-VI frames with the same protocol, so models can
+go in one table. The default subset is the six sequences of arXiv:2507.02148 (120 frames, 20
+per sequence, evenly spaced in time); pass `--subset all` for all 12 sequences (240 frames).
 
 ## Setup
 ```toml
@@ -10,15 +11,16 @@ flsea = ["kagglehub", "kaggle>=1.7", "tifffile", "imagecodecs"]
 depth-anything = ["transformers>=4.45"]
 ```
 Kaggle credentials (`KAGGLE_USERNAME` + `KAGGLE_KEY`, or `KAGGLE_API_TOKEN`, or `~/.kaggle/kaggle.json`).
-The dataset is 92 GB: only the 480 files of the manifest are downloaded (kagglehub caches them).
+The dataset is 92 GB: only the files for the selected frames are downloaded (240 files for the
+default subset, 480 for `--subset all`; kagglehub caches them).
 
 ## Run
 ```bash
 uv run --extra cu --extra flsea --extra depth-anything python scripts/evaluate_flsea.py --model depth-anything
 uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model yolo --variant n
 uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model unidepth
-# only the 6 sequences of arXiv:2507.02148
-... --subset arxiv-2507.02148
+# all 12 sequences instead of the default paper subset
+... --subset all
 # dataset already on disk
 ... --local-root /kaggle/input/flsea-vi
 # also save the generated depth maps, one <frame_id>.png per scored frame
@@ -72,6 +74,9 @@ For claims about physical meters, use `--include-raw` (possibly after calibratin
 the aligned rows.
 
 ## Reference numbers (Depth Anything V2 Small, zero-shot, Colab T4)
+
+The `all` rows require `--subset all`; the default subset produces the `arxiv subset` row.
+
 | subset | alignment | AbsRel | RMSE | d1 | d2 | d3 | SILog |
 |---|---|---|---|---|---|---|---|
 | all (238) | ssi | 0.0674 | 0.5654 | 0.9601 | 0.9912 | 0.9961 | 10.19 |

@@ -2,15 +2,17 @@
 """Evaluate a depth model on the FLSea evaluation frames.
 
 Every model is scored on the same frames (``configs/flsea_eval_frames.csv``) with the
-same alignment and metrics (see ``yolo_depth_underwater.metrics``).
+same alignment and metrics (see ``yolo_depth_underwater.metrics``). The default subset
+is the six FLSea sequences of arXiv:2507.02148 (120 frames); use ``--subset all`` to
+score all 12 sequences (240 frames).
 
 Examples:
     uv run --extra cu --extra flsea --extra depth-anything \\
         python scripts/evaluate_flsea.py --model depth-anything
 
-    # the six sequences of arXiv:2507.02148 only
+    # all 12 sequences (default is the six sequences of arXiv:2507.02148)
     uv run --extra cu --extra flsea python scripts/evaluate_flsea.py \\
-        --model yolo --variant n --subset arxiv-2507.02148
+        --model yolo --variant path/to/yolo.pt --subset all
 
     # dataset already on disk (e.g. a Kaggle notebook)
     ... --local-root /kaggle/input/flsea-vi
@@ -30,6 +32,7 @@ from yolo_depth_underwater import evaluation, flsea
 from yolo_depth_underwater.inference_model import InferenceModel
 
 DEFAULT_MANIFEST = Path(__file__).resolve().parents[1] / "configs" / "flsea_eval_frames.csv"
+DEFAULT_SUBSET = flsea.Subset.CAI_METZLER
 
 
 def build_model(name: str, variant: str | None, device: str | None) -> InferenceModel:
@@ -42,7 +45,7 @@ def build_model(name: str, variant: str | None, device: str | None) -> Inference
         from yolo_depth_underwater.yolo_model import YoloModel
 
         # No USOD10K DepthDataset is needed to call ``predict``.
-        return YoloModel(None, variant or "n", device)
+        return YoloModel(None, variant or "yolo26n-depth.pt", device)
     if name == "unidepth":
         from yolo_depth_underwater.unidepth_model import UniDepthV2Model
 
@@ -53,10 +56,12 @@ def build_model(name: str, variant: str | None, device: str | None) -> Inference
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", required=True, choices=["depth-anything", "yolo", "unidepth"])
-    parser.add_argument("--variant", help="depth-anything: small|base|large; yolo: n|s|x")
+    parser.add_argument("--variant", help="depth-anything: small|base|large; yolo: path/to/yolo.pt")
     parser.add_argument("--device", help="e.g. cuda, cpu (default: cuda if available)")
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument("--subset", choices=sorted(flsea.SUBSETS), default="all")
+    parser.add_argument(
+        "--subset", type=flsea.Subset, choices=list(flsea.Subset), default=DEFAULT_SUBSET
+    )
     parser.add_argument("--local-root", type=Path, help="use a local copy of the dataset instead of downloading")
     parser.add_argument("--min-valid-frac", type=float, default=evaluation.DEFAULT_MIN_VALID_FRAC)
     parser.add_argument("--include-raw", action="store_true",

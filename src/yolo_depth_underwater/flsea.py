@@ -25,6 +25,7 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
+from enum import StrEnum
 from pathlib import Path
 
 import numpy as np
@@ -52,13 +53,20 @@ SEQUENCES: tuple[str, ...] = (
 )
 """The 12 FLSea-VI sequences with reference depth (``calibration`` is excluded)."""
 
-SUBSETS: dict[str, tuple[str, ...]] = {
-    "all": SEQUENCES,
-    # Six FLSea sequences used for zero-shot evaluation in arXiv:2507.02148
-    # ("Real-World Benchmarking and Synthetic Fine-Tuning of Monocular Metric
-    # Depth Estimation in Underwater Environments", Sec. 3.5). Only the choice of
-    # sequences is shared: that paper does not describe per-image alignment.
-    "arxiv-2507.02148": (
+
+class Subset(StrEnum):
+    ALL = "all"
+
+    # Cai & Metzler, "Real-World Benchmarking and Synthetic Fine-Tuning of
+    # Monocular Metric Depth Estimation in Underwater Environments"
+    # (arXiv:2507.02148, Sec. 3.5). Only the sequence choice is shared, because the
+    # paper does not describe per-image alignment and uses the entire scenes.
+    CAI_METZLER = "arxiv-2507.02148"
+
+
+SUBSETS: dict[Subset, tuple[str, ...]] = {
+    Subset.ALL: SEQUENCES,
+    Subset.CAI_METZLER: (
         "canyons/u_canyon",
         "canyons/flatiron",
         "red_sea/big_dice_loop",

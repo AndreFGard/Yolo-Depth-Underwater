@@ -13,14 +13,10 @@ from yolo_depth_underwater.dataset import DepthDataset
 from yolo_depth_underwater.sample import DepthSample
 from yolo_depth_underwater.split import Split
 
-_CHECKPOINT_FSTR = "yolo26{}-depth.pt"
-
-
-class YoloVariant(StrEnum):
-    SMALL = "s"
-    NANO = "n"
-    EXTRA = "x"
-
+class YoloCheckpoints(StrEnum):
+    NANO = "yolo26n-depth.pt"
+    SMALL = "yolo26s-depth.pt"
+    EXTRA = "yolo26x-depth.pt"
 
 class YoloModel(inference_model.InferenceModel):
     """YOLO depth estimator."""
@@ -32,17 +28,17 @@ class YoloModel(inference_model.InferenceModel):
     def __init__(
         self,
         dataset: DepthDataset | None = None,
-        variant: str | YoloVariant = YoloVariant.NANO,
+        checkpoint: str =YoloCheckpoints.NANO,
         device: str | None = None,
     ) -> None:
-        variant = YoloVariant(variant)
+        self._checkpoint = checkpoint
         self._dataset = dataset
         self._device = torch.device(
             device or ("cuda" if torch.cuda.is_available() else "cpu")
         )
-        print(f"Starting yolo: {_CHECKPOINT_FSTR.format(variant.value)}")
+        print(f"Starting yolo: {checkpoint}")
 
-        self._model = ultralytics.YOLO(_CHECKPOINT_FSTR.format(variant.value)).to(
+        self._model = ultralytics.YOLO(checkpoint).to(
             self._device
         )
 
@@ -50,7 +46,7 @@ class YoloModel(inference_model.InferenceModel):
         results = self._model.predict(image, device=self._device, verbose=False)
         depth = results[0].depth
         if depth is None:
-            raise RuntimeError(f"{_CHECKPOINT_FSTR} did not return a depth map")
+            raise RuntimeError(f"{self._checkpoint} did not return a depth map")
         return depth.data.float().cpu().numpy()
 
     def predict(self, images: Iterator[np.ndarray]) -> Iterator[np.ndarray]:

@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "tqdm",
     "ultralytics>=8.4.175",
+    "pandas",
 ]
 
 [project.optional-dependencies]

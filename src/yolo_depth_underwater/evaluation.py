@@ -16,6 +16,7 @@ import numpy as np
 from PIL import Image
 
 from yolo_depth_underwater import metrics
+from yolo_depth_underwater.encoding import save_depth_png
 from yolo_depth_underwater.flsea import FLSeaFrame, load_frame
 from yolo_depth_underwater.inference_model import InferenceModel, OutputKind
 
@@ -52,6 +53,7 @@ def evaluate_model(
     *,
     min_valid_frac: float = DEFAULT_MIN_VALID_FRAC,
     include_raw: bool = False,
+    predictions_dir: str | Path | None = None,
     show_progress: bool = True,
 ) -> tuple[list[dict], list[tuple[FLSeaFrame, str]]]:
     """Score ``model`` on ``frames`` (which must have local paths).
@@ -60,6 +62,8 @@ def evaluate_model(
     (scale only), plus the ``constant`` control (a flat map: a model should beat it).
     With ``include_raw=True`` and a depth-output model it also records ``raw`` (no
     alignment; only meaningful for models that predict metric depth).
+    If ``predictions_dir`` is set, the raw meter prediction for depth models, or the oracle ``ssi``-aligned depth in
+    meters for disparity models (their raw output is not in meters).
 
     Returns ``(rows, skipped)``: one dict per (frame, alignment) with the keys in
     ``ROW_FIELDS``, and the frames that were skipped with the reason.
@@ -84,6 +88,14 @@ def evaluate_model(
         pred = _resize(_predict_one(model, image), gt.shape)
         disp = pred if kind is OutputKind.DISPARITY else metrics.depth_to_disparity(pred)
         base = {"sequence": frame.sequence, "frame_id": frame.frame_id, "valid_frac": valid_frac}
+
+        if predictions_dir is not None:
+            depth_to_save = (
+                pred
+                if kind is OutputKind.DEPTH
+                else metrics.align_to_depth(disp, gt, valid, mode="ssi")
+            )
+            save_depth_png(Path(predictions_dir) / f"{frame.frame_id}.png", depth_to_save)
 
         for mode in metrics.ALIGN_MODES:
             depth = metrics.align_to_depth(disp, gt, valid, mode)
@@ -114,11 +126,11 @@ def summarize(rows: list[dict]) -> dict[str, dict[str, tuple[float, float]]]:
 
 def format_summary(summary: dict[str, dict[str, tuple[float, float]]], n_frames: int) -> str:
     """Plain-text table: ``mean ± std`` of each metric per alignment."""
-    header = f"{'alignment':<10}" + "".join(f"{m:>16}" for m in metrics.METRIC_NAMES)
-    lines = [f"{n_frames} frames (mean ± std over frames)", header]
+    header = f"{'alignment':<10}" + "".join(f"{m:^16}" for m in metrics.METRIC_NAMES)
+    lines = [f"{n_frames} frames (mean ± std over frames)", header.rstrip()]
     for alignment, vals in summary.items():
         cells = "".join(f"{vals[m][0]:>9.4f}±{vals[m][1]:<6.3f}" for m in metrics.METRIC_NAMES)
-        lines.append(f"{alignment:<10}{cells}")
+        lines.append(f"{alignment:<10}{cells}".rstrip())
     return "\n".join(lines)
 
 

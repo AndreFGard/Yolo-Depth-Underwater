@@ -1,7 +1,7 @@
 """Encoding helpers for the scaled uint16 depth PNG convention.
 
 Ultralytics stores depth as uint16 PNG where ``value = depth * scale`` and
-``0`` marks invalid pixels; 
+``0`` marks invalid pixels;
 """
 
 import logging
@@ -57,4 +57,9 @@ def save_depth_png(
 
 def load_depth_img(path: str | Path, scale: float = DEPTH_SCALE) -> np.ndarray:
     """Load a scaled uint16 depth PNG as float32 **meters** (0 = invalid)"""
-    return load_depth(Path(path), scale)
+    path = Path(path)
+    if path.suffix.lower() in {".tif", ".tiff"}:
+        raise ValueError(
+            f"Depth img '{path}' is a tiff, but this uint16-PNG loader does not support FLSea images"
+        )
+    return load_depth(path, scale)

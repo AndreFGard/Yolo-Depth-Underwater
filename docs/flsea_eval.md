@@ -21,9 +21,13 @@ uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model unidept
 ... --subset arxiv-2507.02148
 # dataset already on disk
 ... --local-root /kaggle/input/flsea-vi
+# also save the generated depth maps, one <frame_id>.png per scored frame
+... --save-predictions results/flsea_yolo_n_depth
 ```
 Output: per-frame CSV in `results/` and a summary table (mean ± std over frames).
 Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
+
+With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-aligned depth in metres, since their raw output is not in metres. Skipped frames are not saved.
 
 ## Protocol
 * Reference: SfM depth (metric, float32), valid = finite and > 0; frames with < 2% valid pixels are skipped.
@@ -36,9 +40,36 @@ Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
   or frame-to-frame scale drift. `--include-raw` scores metric models without alignment.
 * `constant` = best flat map; a model must beat it.
 * Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog (lambda = 0.85), on valid pixels.
-* Oracle alignment uses the reference, so numbers are an upper bound for relative models and are **not comparable**
-  with the arXiv:2507.02148 tables (no alignment there; only the sequence choice is shared). For claims about
-  physical meters, use `--include-raw` (possibly after calibrating on a separate split), not the aligned rows.
+
+## How the scores are aggregated (important when comparing papers)
+
+We score each frame **separately**, using only the pixels where the SfM reference is valid. The summary then
+takes an ordinary mean of those per-frame numbers. A frame with 11% valid pixels therefore counts exactly as
+much as one with 100% valid pixels. The `±` value is the standard deviation across frames — it describes how
+much scores vary from frame to frame, not statistical uncertainty in the mean.
+
+Many papers instead pool all valid pixels from the whole subset and compute one metric over that combined set
+(e.g. arXiv:2507.02148). All our frames have the same size, so that approach effectively gives each frame a
+weight proportional to its `valid_frac`. On these frames, the two choices produce noticeably different numbers:
+AbsRel differs by 0–6% relative, δ1 by about 0.01, and **RMSE by about 15%**. RMSE changes most because it
+squares errors: pooling gives more influence to the frames with lots of valid reference, and in this dataset
+those include distant frames where the errors are larger. Consequently, do not compare our RMSE (or the other
+scores) with a paper's table without first checking which aggregation it used.
+
+The per-frame CSV in `results/` lets you reproduce the pooled numbers for the same frames:
+
+* AbsRel, δ1, δ2 and δ3: take the weighted average of the per-frame values, with `valid_frac` as the weight.
+* RMSE: compute `sqrt(sum(valid_frac * RMSE_frame²) / sum(valid_frac))`. Averaging the per-frame RMSE values
+  directly is **not** the same thing.
+* SILog: it cannot be recovered from the CSV. Pooling requires `mean(log(error))` and `mean(log(error)²)`
+  across pixels, but the CSV stores only each frame's already-combined SILog value.
+
+## Oracle alignment
+
+Alignment uses the reference, so the aligned numbers are an upper bound for relative models and are **not
+comparable** with the arXiv:2507.02148 tables (those use no alignment; only the sequence choice is shared).
+For claims about physical meters, use `--include-raw` (possibly after calibrating on a separate split), not
+the aligned rows.
 
 ## Reference numbers (Depth Anything V2 Small, zero-shot, Colab T4)
 | subset | alignment | AbsRel | RMSE | d1 | d2 | d3 | SILog |

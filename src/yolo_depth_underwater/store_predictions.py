@@ -23,6 +23,7 @@ def store_predictions(
     dest: str | pathlib.Path,
     splits: list[split.Split] | None = None,
 ) -> None:
+    """Stores predictions for a whiole coco dataset."""
     if splits is None:
         splits = [split.Split.TRAIN, split.Split.VAL, split.Split.TEST]
 

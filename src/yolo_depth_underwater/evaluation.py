@@ -1,9 +1,8 @@
 """Evaluate any ``InferenceModel`` on FLSea frames with the shared protocol.
 
 A model only needs ``predict(images)`` (BGR ``uint8`` arrays in, one float map per
-image out). If it outputs **disparity** (higher = closer, e.g. Depth Anything V2)
-it must set the class attribute ``output_kind = "disparity"``; models that do not
-set it are treated as ``"depth"`` (YOLO26-Depth, UniDepth). See ``metrics`` for the
+image out) plus the ``output_kind`` property: ``DEPTH`` (farther = larger) or
+``DISPARITY`` (closer = larger, e.g. Depth Anything V2). See ``metrics`` for the
 alignment and the metrics.
 """
 
@@ -18,7 +17,7 @@ from PIL import Image
 
 from yolo_depth_underwater import metrics
 from yolo_depth_underwater.flsea import FLSeaFrame, load_frame
-from yolo_depth_underwater.inference_model import InferenceModel
+from yolo_depth_underwater.inference_model import InferenceModel, OutputKind
 
 LOGGER = logging.getLogger(__name__)
 
@@ -65,8 +64,8 @@ def evaluate_model(
     Returns ``(rows, skipped)``: one dict per (frame, alignment) with the keys in
     ``ROW_FIELDS``, and the frames that were skipped with the reason.
     """
-    kind = getattr(model, "output_kind", "depth")
-    if kind not in ("depth", "disparity"):
+    kind = model.output_kind
+    if kind not in (OutputKind.DEPTH, OutputKind.DISPARITY):
         raise ValueError(f"output_kind must be 'depth' or 'disparity', got {kind!r}")
 
     rows: list[dict] = []
@@ -83,7 +82,7 @@ def evaluate_model(
             continue
 
         pred = _resize(_predict_one(model, image), gt.shape)
-        disp = pred if kind == "disparity" else metrics.depth_to_disparity(pred)
+        disp = pred if kind is OutputKind.DISPARITY else metrics.depth_to_disparity(pred)
         base = {"sequence": frame.sequence, "frame_id": frame.frame_id, "valid_frac": valid_frac}
 
         for mode in metrics.ALIGN_MODES:
@@ -91,7 +90,8 @@ def evaluate_model(
             rows.append({**base, "alignment": mode, **metrics.depth_metrics(depth, gt, valid)})
         const = metrics.constant_baseline(gt, valid)
         rows.append({**base, "alignment": "constant", **metrics.depth_metrics(const, gt, valid)})
-        if include_raw and kind == "depth":
+        if include_raw and kind is OutputKind.DEPTH:
+            #TODO: if we ever wanna take metric depth metrics, we will have to calibrate yolo on a validation set or similar.
             raw = np.clip(pred, metrics.MIN_DEPTH_M, metrics.DEPTH_CAP_M)
             rows.append({**base, "alignment": "raw", **metrics.depth_metrics(raw, gt, valid)})
     return rows, skipped

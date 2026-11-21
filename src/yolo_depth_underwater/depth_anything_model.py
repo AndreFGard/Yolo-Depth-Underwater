@@ -1,8 +1,8 @@
 """Depth Anything V2 relative-depth estimator (Hugging Face ``transformers``).
 
 Depth Anything V2 predicts **relative disparity** (affine-invariant inverse depth:
-higher = closer, unknown scale and shift), *not* meters. That is why this class sets
-``output_kind = "disparity"``: ``yolo_depth_underwater.evaluation`` aligns it to the
+higher = closer, unknown scale and shift), *not* meters. That is why this class returns
+``OutputKind.DISPARITY``: ``yolo_depth_underwater.evaluation`` aligns it to the
 reference (scale + shift in disparity space) before computing metrics, exactly as
 for the other models.
 
@@ -40,7 +40,9 @@ _CHECKPOINT_FSTR = "depth-anything/Depth-Anything-V2-{}-hf"
 class DepthAnythingV2Model(inference_model.InferenceModel):
     """Depth Anything V2 (zero-shot, relative disparity)."""
 
-    output_kind = "disparity"
+    @property
+    def output_kind(self) -> inference_model.OutputKind:
+        return inference_model.OutputKind.DISPARITY
 
     def __init__(
         self,

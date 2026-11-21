@@ -39,11 +39,11 @@ def build_model(name: str, variant: str | None, device: str | None) -> Inference
         from yolo_depth_underwater.yolo_model import YoloModel
 
         # No USOD10K DepthDataset is needed to call ``predict``.
-        return YoloModel(None, variant or "n", device)  # type: ignore[arg-type]
+        return YoloModel(None, variant or "n", device)
     if name == "unidepth":
         from yolo_depth_underwater.unidepth_model import UniDepthV2Model
 
-        return UniDepthV2Model(None, device)  # type: ignore[arg-type]
+        return UniDepthV2Model(None, device)
     raise ValueError(f"unknown model {name!r}")
 
 

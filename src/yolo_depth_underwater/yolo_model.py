@@ -25,9 +25,13 @@ class YoloVariant(StrEnum):
 class YoloModel(inference_model.InferenceModel):
     """YOLO depth estimator."""
 
+    @property
+    def output_kind(self) -> inference_model.OutputKind:
+        return inference_model.OutputKind.DEPTH
+
     def __init__(
         self,
-        dataset: DepthDataset,
+        dataset: DepthDataset | None = None,
         variant: str | YoloVariant = YoloVariant.NANO,
         device: str | None = None,
     ) -> None:
@@ -53,5 +57,7 @@ class YoloModel(inference_model.InferenceModel):
         return (self._predict_image(image) for image in images)
 
     def predict_split(self, split: Split) -> Iterator[DepthSample]:
+        if self._dataset is None:
+            raise ValueError("predict_split needs a DepthDataset")
         for sample in self._dataset.depth_samples(split):
             yield replace(sample, depth=self._predict_image(sample.image))

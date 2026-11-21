@@ -18,9 +18,13 @@ MAX_FRACTION = 0.01  # Hard cap: never process more than 1% of a split.
 class UniDepthV2Model(inference_model.InferenceModel):
     """UniDepthV2 metric depth estimator."""
 
+    @property
+    def output_kind(self) -> inference_model.OutputKind:
+        return inference_model.OutputKind.DEPTH
+
     def __init__(
         self,
-        dataset: DepthDataset,
+        dataset: DepthDataset | None = None,
         device: str | None = None,
     ) -> None:
         self._dataset = dataset
@@ -41,5 +45,7 @@ class UniDepthV2Model(inference_model.InferenceModel):
         return (self._predict_image(image) for image in images)
 
     def predict_split(self, split: Split) -> Iterator[DepthSample]:
+        if self._dataset is None:
+            raise ValueError("predict_split needs a DepthDataset")
         for sample in self._dataset.depth_samples(split):
             yield replace(sample, depth=self._predict_image(sample.image))

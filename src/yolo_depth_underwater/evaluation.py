@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 from PIL import Image
+from tqdm import tqdm
 
 from yolo_depth_underwater import metrics
 from yolo_depth_underwater.encoding import save_depth_png, write_csv
@@ -21,11 +22,7 @@ from yolo_depth_underwater.inference_model import InferenceModel, OutputKind
 
 LOGGER = logging.getLogger(__name__)
 
-try:  # progress bar is optional
-    from tqdm import tqdm
-except ImportError:  # pragma: no cover
-    def tqdm(iterable, **_kwargs):
-        return iterable
+
 
 ROW_FIELDS = ("sequence", "frame_id", "valid_frac", "alignment", *metrics.METRIC_NAMES)
 
@@ -51,16 +48,25 @@ def evaluate_model(
     frames: list[FLSeaFrame],
     *,
     min_valid_frac: float = DEFAULT_MIN_VALID_FRAC,
-    include_raw: bool = False,
+    include_raw: bool = True,
+    global_ssi: bool = True,
     predictions_dir: str | Path | None = None,
     show_progress: bool = True,
 ) -> tuple[list[dict], list[tuple[FLSeaFrame, str]]]:
     """Score ``model`` on ``frames`` (which must have local paths).
 
-    Per frame it records, for the alignments ``ssi`` (scale + shift) and ``median``
-    (scale only), plus the ``constant`` control (a flat map: a model should beat it).
-    With ``include_raw=True`` and a depth-output model it also records ``raw`` (no
-    alignment; only meaningful for models that predict metric depth).
+    Per frame it records the alignments ``ssi`` (scale + shift) and ``median``
+    (scale only), both per-image oracle fits, plus the ``constant`` control (a flat
+    map: a model should beat it). With ``include_raw=True`` (default) and a
+    depth-output model it also records ``raw`` (no alignment; only meaningful for
+    models that predict metric depth).
+    With ``global_ssi=True`` (default) it also records ``global-ssi``: one scale +
+    shift for the whole run, fitted in disparity space on the even-indexed frames
+    and applied to the odd-indexed ones and vice versa, so no frame contributes to
+    its own fit. That row is comparable with literature that rescales predictions
+    to dataset-specific depth units (e.g. arXiv:2507.02148) and is the only
+    metric-style row for disparity-output models; while it is on, each scored
+    frame is predicted twice.
     If ``predictions_dir`` is set, the raw meter prediction for depth models, or the oracle ``ssi``-aligned depth in
     meters for disparity models (their raw output is not in meters).
 
@@ -73,7 +79,9 @@ def evaluate_model(
 
     rows: list[dict] = []
     skipped: list[tuple[FLSeaFrame, str]] = []
-    for frame in tqdm(frames, desc="frames", disable=not show_progress):
+    kept: list[int] = []
+    fits = (metrics.GlobalFit(), metrics.GlobalFit())
+    for i, frame in enumerate(tqdm(frames, desc="frames", disable=not show_progress)):
         image, gt = load_frame(frame)
         if gt.shape != image.shape[:2]:
             skipped.append((frame, "image/depth shape mismatch"))
@@ -83,6 +91,7 @@ def evaluate_model(
         if valid_frac < min_valid_frac:
             skipped.append((frame, f"valid fraction {valid_frac:.1%}"))
             continue
+        kept.append(i)
 
         pred = _resize(_predict_one(model, image), gt.shape)
         disp = pred if kind is OutputKind.DISPARITY else metrics.depth_to_disparity(pred)
@@ -105,6 +114,25 @@ def evaluate_model(
             #TODO: if we ever wanna take metric depth metrics, we will have to calibrate yolo on a validation set or similar.
             raw = np.clip(pred, metrics.MIN_DEPTH_M, metrics.DEPTH_CAP_M)
             rows.append({**base, "alignment": "raw", **metrics.depth_metrics(raw, gt, valid)})
+        fits[i % 2].add(disp, gt, valid)
+
+    if global_ssi and kept:
+        params = (fits[0].solve(), fits[1].solve())
+        for i in tqdm(kept, desc="global-ssi", disable=not show_progress):
+            frame = frames[i]
+            image, gt = load_frame(frame)
+            valid = metrics.valid_mask(gt)
+            pred = _resize(_predict_one(model, image), gt.shape)
+            disp = pred if kind is OutputKind.DISPARITY else metrics.depth_to_disparity(pred)
+            depth = metrics.apply_global_alignment(disp, *params[(i + 1) % 2])
+            base = {
+                "sequence": frame.sequence,
+                "frame_id": frame.frame_id,
+                "valid_frac": float(valid.mean()),
+            }
+            rows.append(
+                {**base, "alignment": metrics.GLOBAL_ALIGNMENT, **metrics.depth_metrics(depth, gt, valid)}
+            )
     return rows, skipped
 
 

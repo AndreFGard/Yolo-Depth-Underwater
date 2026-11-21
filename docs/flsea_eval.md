@@ -28,6 +28,8 @@ uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model unidept
 ```
 Output: per-frame CSV in `results/` and a summary table (mean ± std over frames).
 Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
+`raw` and `global-ssi` rows are on by default; `--no-include-raw` / `--no-global-ssi`
+disable them (the latter also halves inference cost).
 
 With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-aligned depth in metres, since their raw output is not in metres. Skipped frames are not saved.
 
@@ -39,8 +41,13 @@ With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-al
 * Per-image oracle alignment in disparity space: `ssi` (scale + shift, least squares) and `median` (scale only);
   aligned disparity is clipped to >= 1/20 m and inverted. The same is applied to every model, metric ones included.
   The per-image scale fit means these scores measure **structure only**: they cannot detect wrong absolute scale
-  or frame-to-frame scale drift. `--include-raw` scores metric models without alignment.
+  or frame-to-frame scale drift. `raw` (default on) scores depth-output models without alignment.
 * `constant` = best flat map; a model must beat it.
+* `global-ssi` (default on): one scale + shift fitted in disparity space on the even-indexed frames of the run and
+  applied to the odd-indexed ones, and vice versa — no frame contributes to its own fit. This mirrors the
+  dataset-level rescaling of arXiv:2507.02148 ("rescaled to match the dataset-specific depth units"), so it is the
+  row to place next to their Depth Anything V2 numbers, and the only metric-style row for disparity-output models.
+  Each scored frame is predicted twice while it is on.
 * Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog (lambda = 0.85), on valid pixels.
 
 ## How the scores are aggregated (important when comparing papers)

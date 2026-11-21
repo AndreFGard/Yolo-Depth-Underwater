@@ -8,10 +8,10 @@
       columns: (1.5fr, 1fr),
       align: (left, left),
       [*Work*], [*Method*],
-      [UDepth], [UDepth],
+      [@udepth], [Domain-aware RMI input with MobileNetV2 and mViT],
     ),
     caption: [Summary of related works in underwater object detection.],
   ) <tab:related>
 
-  A relevant citation is @example2023, which demonstrates minimal Typst usage.
+  For example, @flsea introduced a forward-looking underwater stereo and visual-inertial dataset with metric ground-truth depth.
 ]

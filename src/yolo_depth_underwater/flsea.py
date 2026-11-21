@@ -29,6 +29,8 @@ from pathlib import Path
 
 import numpy as np
 
+from yolo_depth_underwater.encoding import write_csv
+
 LOGGER = logging.getLogger(__name__)
 
 HANDLE = "viseaonlab/flsea-vi"
@@ -104,12 +106,11 @@ def read_manifest(
 
 
 def write_manifest(frames: list[FLSeaFrame], path: str | Path) -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(["sequence", "frame_id"])
-        writer.writerows((fr.sequence, fr.frame_id) for fr in frames)
+    write_csv(
+        [{"sequence": fr.sequence, "frame_id": fr.frame_id} for fr in frames],
+        path,
+        columns=["sequence", "frame_id"],
+    )
 
 
 # --------------------------------------------------------------------------- selection

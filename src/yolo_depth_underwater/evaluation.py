@@ -8,7 +8,6 @@ alignment and the metrics.
 
 from __future__ import annotations
 
-import csv
 import logging
 from pathlib import Path
 
@@ -16,7 +15,7 @@ import numpy as np
 from PIL import Image
 
 from yolo_depth_underwater import metrics
-from yolo_depth_underwater.encoding import save_depth_png
+from yolo_depth_underwater.encoding import save_depth_png, write_csv
 from yolo_depth_underwater.flsea import FLSeaFrame, load_frame
 from yolo_depth_underwater.inference_model import InferenceModel, OutputKind
 
@@ -135,9 +134,4 @@ def format_summary(summary: dict[str, dict[str, tuple[float, float]]], n_frames:
 
 
 def write_rows(rows: list[dict], path: str | Path) -> None:
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=ROW_FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
+    write_csv(rows, path, columns=list(ROW_FIELDS), float_places=6)

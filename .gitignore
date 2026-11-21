@@ -2,6 +2,8 @@
 __pycache__/
 *.py[oc]
 build/
+!report/build/
+!report/build/*.py
 dist/
 wheels/
 *.egg-info
@@ -12,6 +14,7 @@ yolo/
 uv.lock
 .env
 report/main.pdf
+report/slides.pdf
 .vscode/
 report/fonts
 3rd_party/

@@ -65,7 +65,8 @@ uv run --extra cu python script.py
 ```
 
 ## Notes
-
+- Use the `encoding.csv` to store csvs on disk with the standardized float rounding.
+- read report/README.md for the convention on keeping csvs and such versioned.
 - The `rocm` and `cu` extras are declared as conflicting in
   `[tool.uv] conflicts`, so a single `uv.lock` covers both variants without
   version collisions. Do not enable both at once.

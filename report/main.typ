@@ -1,5 +1,5 @@
 #import "@preview/charged-ieee:0.1.4": ieee
-#import "sections/introduction.typ": introduction
+#import "sections/objectives.typ" : objectives
 #import "sections/experiments.typ": experiments
 #import "sections/related-work.typ": related-work
 #import "sections/results-and-discussions.typ": results-and-discussions
@@ -15,7 +15,7 @@
   bibliography: bibliography("refs.bib", full: true),
 )
 
-#introduction
+#objectives
 #experiments
 #related-work
 #results-and-discussions

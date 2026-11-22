@@ -1,5 +1,7 @@
 #import "@preview/charged-ieee:0.1.4": ieee
 #import "sections/objectives.typ" : objectives
+#import "sections/justificativa.typ": justificativa
+#import "sections/modelos.typ": modelos
 #import "sections/experiments.typ": experiments
 #import "sections/related-work.typ": related-work
 #import "sections/results-and-discussions.typ": results-and-discussions
@@ -16,6 +18,8 @@
 )
 
 #objectives
+#justificativa
+#modelos
 #experiments
 #related-work
 #results-and-discussions

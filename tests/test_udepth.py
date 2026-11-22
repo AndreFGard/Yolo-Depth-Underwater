@@ -1,4 +1,5 @@
 import csv
+import hashlib
 import importlib.util
 import json
 import sys
@@ -154,14 +155,19 @@ def test_results_match_group_frames_masks_and_constant_control():
     )
     assert len(manifest) == 120
     assert len(expected) == 119
-    assert len(rows) == 476
+    assert len(rows) == 595
     excluded = json.loads(
         (ROOT / "artifacts/udepth_flsea_excluded_frames.json").read_text()
     )
     assert {(f.sequence, f.frame_id) for f in manifest} - expected == {
         key(r) for r in excluded
     }
-    assert {r["alignment"] for r in rows} == {"ssi", "median", "constant", "global-ssi"}
+    alignments = {"ssi", "median", "constant", "rescaled", "global-ssi"}
+    assert {r["alignment"] for r in rows} == alignments
+    for alignment in alignments:
+        part = [r for r in rows if r["alignment"] == alignment]
+        assert len(part) == 119
+        assert {key(r) for r in part} == expected
     own = {key(r): r for r in rows if r["alignment"] == "constant"}
     for name in ["yolo_baseline", "yolo_unfrozen_80_unidepth", "unidepth"]:
         peer = read(ROOT / f"artifacts/{name}_evaluation_flsea.csv")
@@ -172,3 +178,33 @@ def test_results_match_group_frames_masks_and_constant_control():
                     assert float(row[field]) == pytest.approx(
                         float(own[key(row)][field]), abs=2e-6
                     )
+
+
+def test_versioned_results_match_colab_validation_and_prediction_index():
+    validation = json.loads(
+        (ROOT / "artifacts/udepth_flsea_validation.json").read_text()
+    )
+    csv_path = ROOT / "artifacts/udepth_evaluation_flsea.csv"
+    assert hashlib.sha256(csv_path.read_bytes()).hexdigest() == validation["csv_sha256"]
+    with csv_path.open() as stream:
+        rows = list(csv.DictReader(stream))
+    assert len(rows) == validation["n_csv_rows"]
+    assert len({(r["sequence"], r["frame_id"]) for r in rows}) == validation["n_scored"]
+    assert validation["dataset_version"] == 5
+    assert validation["n_requested"] == 120
+    assert validation["model_protocol"]["training"] is False
+    assert validation["relative_maps_sha256_checked"] is True
+    for name, expected_hash in validation["source_sha256"].items():
+        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected_hash
+    for alignment, summary in validation["summary"].items():
+        part = [r for r in rows if r["alignment"] == alignment]
+        for metric, (mean, std) in summary.items():
+            values = np.array([float(r[metric]) for r in part])
+            np.testing.assert_allclose([values.mean(), values.std(ddof=1)], [mean, std])
+    with (ROOT / "artifacts/udepth_flsea_relative_index.csv").open() as stream:
+        index = list(csv.DictReader(stream))
+    assert len(index) == validation["n_relative_maps"] == 119
+    assert {(r["sequence"], r["frame_id"]) for r in index} == {
+        (r["sequence"], r["frame_id"]) for r in rows
+    }
+    assert all(r["dtype"] == "float32" and r["unit"] == "relative" for r in index)

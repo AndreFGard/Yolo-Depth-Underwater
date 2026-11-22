@@ -1,0 +1,191 @@
+{
+  "status": "validacao_tecnica_concluida",
+  "evaluator_commit": "fa5f0c8badef0a22574802cad148d364c0da23f5",
+  "dataset_version": 5,
+  "n_requested": 120,
+  "n_scored": 119,
+  "n_csv_rows": 595,
+  "alignments": [
+    "ssi",
+    "median",
+    "constant",
+    "rescaled",
+    "global-ssi"
+  ],
+  "excluded": [
+    [
+      "red_sea/cross_pyramid_loop",
+      "16315964096184783"
+    ]
+  ],
+  "same_frames": true,
+  "same_valid_fraction_and_constant": true,
+  "n_relative_maps": 119,
+  "relative_maps_sha256_checked": true,
+  "csv_sha256": "5f55c890cd0f51c0071ecd5f675254c0ca8153ae47e7e5f00dad6767fb75fe17",
+  "model_protocol": {
+    "model": "UDepth-RMI, saída da rede sem filtro CPD/guidedfilter",
+    "commit": "baa8fcf7893fc4a485f115ff567a39481f9f24b6",
+    "weights_sha256": "f97343d3356feca7b8cca1a8951cea38ce1f17eeb3a797a63d98f2bfae764c89",
+    "runtime_sha256": "af0aecba12eaa01a42228eeba4a53d9779c414d042233b7a7f8ea9307462fa09",
+    "input_hw": [
+      480,
+      640
+    ],
+    "input": "R, max(G,B), luminância PIL",
+    "preprocessing": "RGB para RMI antes do resize PIL BICUBIC; float32 / 255",
+    "output_convention": "saída bruta tratada como inversa relativa, fixa antes do teste",
+    "conversion": "depth_relative = 1 / max(inverse_raw, 1e-6)",
+    "eps": 1e-06,
+    "resize_output": "bilinear na inversa, align_corners=False, antes da conversão",
+    "unit": "relative; sem calibração em metros",
+    "training": false,
+    "torch": "2.14.1+cpu",
+    "torchvision": "0.29.1+cpu",
+    "device": "cpu",
+    "adapter": "UDepthRMIModel-v1",
+    "interface_input": "BGR uint8 from repository flsea.load_frame; converted to RGB before official RMI preprocessing",
+    "interface_output": "relative inverse depth; larger means closer; not calibrated stereo disparity",
+    "saved_relative_map": "1/max(raw,1e-6), float32 NPY; larger means farther",
+    "flsea_training": false,
+    "minmax_normalization": false
+  },
+  "summary": {
+    "ssi": {
+      "AbsRel": [
+        0.12910475630252102,
+        0.06820017116857668
+      ],
+      "RMSE": [
+        0.9277812773109243,
+        0.6707423294547404
+      ],
+      "d1": [
+        0.846621487394958,
+        0.13951679873799935
+      ],
+      "d2": [
+        0.9616777899159665,
+        0.056307220213311956
+      ],
+      "d3": [
+        0.9870011764705883,
+        0.029380639257807303
+      ],
+      "SILog": [
+        17.54064467226891,
+        8.042784120220666
+      ]
+    },
+    "median": {
+      "AbsRel": [
+        0.22950370588235297,
+        0.15468268545235353
+      ],
+      "RMSE": [
+        1.620825655462185,
+        1.1528253288274974
+      ],
+      "d1": [
+        0.7242971764705884,
+        0.17759812278958315
+      ],
+      "d2": [
+        0.8972378403361345,
+        0.11202220433732296
+      ],
+      "d3": [
+        0.9542983025210084,
+        0.06330765023904347
+      ],
+      "SILog": [
+        25.580714848739497,
+        12.195622176450579
+      ]
+    },
+    "constant": {
+      "AbsRel": [
+        0.32303012605042014,
+        0.07836833883455337
+      ],
+      "RMSE": [
+        1.6346328319327728,
+        0.783615851076217
+      ],
+      "d1": [
+        0.3996644033613445,
+        0.13901712107715974
+      ],
+      "d2": [
+        0.7136205798319327,
+        0.13306888788292412
+      ],
+      "d3": [
+        0.8770190168067226,
+        0.08208615752583165
+      ],
+      "SILog": [
+        44.479727949579825,
+        12.146573805823005
+      ]
+    },
+    "rescaled": {
+      "AbsRel": [
+        0.4849153697478991,
+        0.41109230307475075
+      ],
+      "RMSE": [
+        2.1572438067226893,
+        1.3967218349486692
+      ],
+      "d1": [
+        0.3205467731092437,
+        0.27036767207880547
+      ],
+      "d2": [
+        0.6258060336134452,
+        0.3193978636028795
+      ],
+      "d3": [
+        0.8222832773109244,
+        0.24497417611481892
+      ],
+      "SILog": [
+        30.291517294117646,
+        12.087958295431637
+      ]
+    },
+    "global-ssi": {
+      "AbsRel": [
+        0.3496461344537815,
+        0.19115876615986363
+      ],
+      "RMSE": [
+        1.4755432100840338,
+        0.7843254482445828
+      ],
+      "d1": [
+        0.3388611092436975,
+        0.27984343473991014
+      ],
+      "d2": [
+        0.6446767899159666,
+        0.3030398112871985
+      ],
+      "d3": [
+        0.8575074873949579,
+        0.21320280807023065
+      ],
+      "SILog": [
+        26.865298613445372,
+        8.167414774946135
+      ]
+    }
+  },
+  "source_sha256": {
+    "scripts/evaluate_flsea.py": "244d6cb11180b51970c16319cf4e4703a0fbf551f7932c8420898cfdbb8b880c",
+    "src/yolo_depth_underwater/evaluation.py": "52e3abe528665f8fb06bdf5659ae631a49beb5bb800c46b8ce846155a28cc2cd",
+    "src/yolo_depth_underwater/metrics.py": "1037a1ec51210b200ba5bd64ec0f6f64a06cf6c65a095ee750ea9f13df94393a",
+    "src/yolo_depth_underwater/udepth_model.py": "d1f0552bd0038c1e0aabd9229db763600c24b83000d5e21b22d8f3f64704ea95"
+  }
+}

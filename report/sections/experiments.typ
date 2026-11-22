@@ -53,7 +53,9 @@
   //TODO lembrar de escrever sobre eles na base de dados.
   Fizemos um finetuning do YOLO26 para cada dataset de rótulos sintéticos obtidos do USOD10K e dos dois professores, usando o split do USOD10K entre treino, validação e teste, usando as imagens base inalteradas do USOD10K e os mapas de profundidade devidamente convertidos, conforme descrito em REF_BASE_DE_DADOS.
 
-  Utilizamos
+
+  //TODO adicionar footnote com os estudos limitados sobre Learning rate e não-congelamento de backbone.
+  Cada modelo foi treinado com imagens em resolução completa, 640x480, por 80 épocas, com o otimizador AdamW padrão, com taxa de aprendizado inicial 0.01 e decaimento linear, além do congelamento das 11 camadas do _backbone_ do modelo. Devido a restrições computacionais, não fizemos tunagem de parâmetros de treinamento.
 
   == Estudo comparativo das baselines em zero-shot
 

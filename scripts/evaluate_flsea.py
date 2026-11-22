@@ -134,12 +134,12 @@ def main() -> int:
         include_raw=args.include_raw,
         predictions_dir=(
             args.save_predictions / "alinhadas_ssi"
-            if args.model == "udepth"
+            if args.model == "udepth" and args.save_predictions is not None
             else args.save_predictions
         ),
     )
 
-    if args.model == "udepth":
+    if args.model == "udepth" and args.save_predictions is not None:
         from yolo_depth_underwater.udepth_model import export_relative_predictions
 
         export_relative_predictions(model, frames, rows, args.save_predictions)

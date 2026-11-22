@@ -1,58 +1,90 @@
 [
   {
-    "model": "UDepth-RMI (pré-treinado)",
+    "model": "UDepth-RMI, execução anterior",
     "same_frame_ids": true,
     "same_valid_fraction": true,
-    "constant_max_abs_difference": {
+    "control_metrics_compared": [
+      "AbsRel",
+      "RMSE",
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "control_max_abs_difference": {
       "AbsRel": 0.0,
       "RMSE": 0.0,
       "d1": 0.0,
       "d2": 0.0,
-      "d3": 0.0,
-      "SILog": 0.0
+      "d3": 0.0
     },
-    "source": "execução UDepth desta etapa"
+    "silog_comparable": false,
+    "silog_reason": "CSV histórico com lambda=0.85; UDepth atual com lambda=1.0. Reavaliação necessária para comparar SILog.",
+    "source": "udepth_evaluation_flsea.csv @ 05724b4"
   },
   {
     "model": "YOLO26 baseline",
     "same_frame_ids": true,
     "same_valid_fraction": true,
-    "constant_max_abs_difference": {
+    "control_metrics_compared": [
+      "AbsRel",
+      "RMSE",
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "control_max_abs_difference": {
       "AbsRel": 0.0,
       "RMSE": 0.0,
       "d1": 0.0,
       "d2": 0.0,
-      "d3": 0.0,
-      "SILog": 0.0
+      "d3": 0.0
     },
-    "source": "yolo_baseline_evaluation_flsea.csv"
+    "silog_comparable": false,
+    "silog_reason": "CSV histórico com lambda=0.85; UDepth atual com lambda=1.0. Reavaliação necessária para comparar SILog.",
+    "source": "yolo_baseline_evaluation_flsea.csv (histórico na main 1ad6133)"
   },
   {
     "model": "YOLO26 unfrozen_80_unidepth",
     "same_frame_ids": true,
     "same_valid_fraction": true,
-    "constant_max_abs_difference": {
+    "control_metrics_compared": [
+      "AbsRel",
+      "RMSE",
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "control_max_abs_difference": {
       "AbsRel": 0.0,
       "RMSE": 0.0,
       "d1": 0.0,
       "d2": 0.0,
-      "d3": 0.0,
-      "SILog": 0.0
+      "d3": 0.0
     },
-    "source": "yolo_unfrozen_80_unidepth_evaluation_flsea.csv"
+    "silog_comparable": false,
+    "silog_reason": "CSV histórico com lambda=0.85; UDepth atual com lambda=1.0. Reavaliação necessária para comparar SILog.",
+    "source": "yolo_unfrozen_80_unidepth_evaluation_flsea.csv (histórico na main 1ad6133)"
   },
   {
     "model": "UniDepth V2",
     "same_frame_ids": true,
     "same_valid_fraction": true,
-    "constant_max_abs_difference": {
+    "control_metrics_compared": [
+      "AbsRel",
+      "RMSE",
+      "d1",
+      "d2",
+      "d3"
+    ],
+    "control_max_abs_difference": {
       "AbsRel": 0.0,
       "RMSE": 0.0,
       "d1": 0.0,
       "d2": 0.0,
-      "d3": 0.0,
-      "SILog": 0.0
+      "d3": 0.0
     },
-    "source": "unidepth_evaluation_flsea.csv"
+    "silog_comparable": false,
+    "silog_reason": "CSV histórico com lambda=0.85; UDepth atual com lambda=1.0. Reavaliação necessária para comparar SILog.",
+    "source": "unidepth_evaluation_flsea.csv (histórico na main 1ad6133)"
   }
 ]

@@ -1,6 +1,6 @@
 #import "@preview/charged-ieee:0.1.4": ieee
 #import "sections/introduction.typ": introduction
-#import "sections/methodology.typ": methodology
+#import "sections/experiments.typ": experiments
 #import "sections/related-work.typ": related-work
 #import "sections/results-and-discussions.typ": results-and-discussions
 
@@ -16,9 +16,21 @@
 )
 
 #introduction
-#methodology
+#experiments
 #related-work
 #results-and-discussions
+
+/*
+• Objetivo(s)
+• Justificativa
+• Base da dados
+• Análise Exploratória dos dados
+• Modelos em Aprendizagem Profundas
+• Experimentos
+• Análise dos resultados
+• Conclusões e discussões
+• Referências
+*/
 
 /*
 References for when needed

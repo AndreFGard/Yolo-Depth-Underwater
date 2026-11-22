@@ -30,7 +30,6 @@ sem credenciais; se o Kaggle pedir autenticação, configure-a fora do Git.
 `UDEPTH_ASSETS` define a pasta de fontes/pesos oficiais, por padrão `udepth_assets/`.
 `UDEPTH_CACHE` define o cache das inferências, por padrão `results/udepth_cache/`.
 O cache só é reutilizado quando protocolo, imagem e hashes dos dois mapas conferem.
-Assim, a segunda passagem de `global-ssi` pode reutilizar a inferência.
 
 As dependências próprias ficam no extra `udepth`. Os outros modelos continuam
 importados sob demanda; UniDepth e Depth Anything não são necessários para UDepth.
@@ -62,7 +61,11 @@ Os NPYs são os mapas a usar quando o grupo precisar da profundidade relativa.
 ## Resultados versionados
 
 O arquivo [udepth_evaluation_flsea.csv](../artifacts/udepth_evaluation_flsea.csv)
-contém 476 linhas: 119 imagens × quatro protocolos. O manifesto comum contém
+contém 476 linhas: 119 imagens × quatro protocolos (`ssi`, `median`, `global-ssi`,
+`constant`). O alinhamento `global-ssi` foi removido do código em 2026-11-22 (ver
+[protocolo](flsea_eval.md)); o CSV é mantido como registro histórico e não é
+regenerado por esta versão. Os protocolos correntes são `ssi`, `median` e `control` (esta última linha aparece como `constant` no CSV histórico)
+(mais `raw` para modelos de profundidade métrica). O manifesto comum contém
 120 pares em seis sequências. O frame `red_sea/cross_pyramid_loop/16315964096184783`
 foi excluído pelo critério original de menos de 2% de GT válido.
 
@@ -70,19 +73,17 @@ foi excluído pelo critério original de menos de 2% de GT válido.
 |---|---:|---:|---:|---:|---:|---:|
 | ssi | 0.1291 | 0.9278 | 0.8466 | 0.9617 | 0.9870 | 17.5406 |
 | median | 0.2295 | 1.6208 | 0.7243 | 0.8972 | 0.9543 | 25.5807 |
-| global-ssi | 0.3496 | 1.4755 | 0.3389 | 0.6447 | 0.8575 | 26.8653 |
-| constant | 0.3230 | 1.6346 | 0.3997 | 0.7136 | 0.8770 | 44.4797 |
+| global-ssi (histórico, removido) | 0.3496 | 1.4755 | 0.3389 | 0.6447 | 0.8575 | 26.8653 |
+| constant (rótulo histórico de `control`) | 0.3230 | 1.6346 | 0.3997 | 0.7136 | 0.8770 | 44.4797 |
 
 Valores são médias por imagem, com o mesmo peso por frame. δ1 é a fração de pixels
 válidos cuja razão previsão/referência, em qualquer sentido, é menor que 1.25.
 Não é uma porcentagem de imagens classificadas corretamente.
 
 `ssi` e `median` usam o GT da própria imagem e medem estrutura após alinhamento.
-A linha principal do relatório do grupo é `ssi`. `global-ssi` ajusta escala e
-deslocamento usando a outra metade dos índices originais do manifesto, sem usar
-o GT do próprio frame no ajuste. Esse protocolo tem desempenho inferior ao
-controle constante em AbsRel e δ1 neste experimento, indicando limitação da
-calibração entre imagens. Os resultados não demonstram profundidade métrica
+A linha principal do relatório do grupo é `ssi`. A linha `global-ssi` da tabela é
+histórica: ela fica pior que o controle constante em AbsRel e δ1 e foi removida
+do código justamente por não ter protocolo publicado equivalente. Os resultados não demonstram profundidade métrica
 independente e não devem ser misturados com o piloto anterior de 150 imagens.
 
 Os resultados foram produzidos em CPU com torch 2.5.1+cpu e torchvision 0.20.1+cpu,

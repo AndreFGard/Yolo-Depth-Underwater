@@ -49,6 +49,7 @@ def evaluate_model(
     *,
     min_valid_frac: float = DEFAULT_MIN_VALID_FRAC,
     include_raw: bool = True,
+    rescaled: bool = True,
     global_ssi: bool = True,
     predictions_dir: str | Path | None = None,
     show_progress: bool = True,
@@ -60,13 +61,12 @@ def evaluate_model(
     map: a model should beat it). With ``include_raw=True`` (default) and a
     depth-output model it also records ``raw`` (no alignment; only meaningful for
     models that predict metric depth).
+    With ``rescaled=True`` (default) it also records ``rescaled``: one scale for
+    the whole run, a least squares fit using a cross fit similar to global ssi.
     With ``global_ssi=True`` (default) it also records ``global-ssi``: one scale +
-    shift for the whole run, fitted in disparity space on the even-indexed frames
-    and applied to the odd-indexed ones and vice versa, so no frame contributes to
-    its own fit. That row is comparable with literature that rescales predictions
-    to dataset-specific depth units (e.g. arXiv:2507.02148) and is the only
-    metric-style row for disparity-output models; while it is on, each scored
-    frame is predicted twice.
+    shift for the whole run, cross-fitted the same way. The ``rescaled`` to
+    ``global-ssi`` gap isolates the global shift. While either dataset-level row
+    is on, each scored frame is predicted twice.
     If ``predictions_dir`` is set, the raw meter prediction for depth models, or the oracle ``ssi``-aligned depth in
     meters for disparity models (their raw output is not in meters).
 
@@ -81,6 +81,7 @@ def evaluate_model(
     skipped: list[tuple[FLSeaFrame, str]] = []
     kept: list[int] = []
     fits = (metrics.GlobalFit(), metrics.GlobalFit())
+    scale_fits = (metrics.RescaledFit(), metrics.RescaledFit())
     for i, frame in enumerate(tqdm(frames, desc="frames", disable=not show_progress)):
         image, gt = load_frame(frame)
         if gt.shape != image.shape[:2]:
@@ -115,24 +116,34 @@ def evaluate_model(
             raw = np.clip(pred, metrics.MIN_DEPTH_M, metrics.DEPTH_CAP_M)
             rows.append({**base, "alignment": "raw", **metrics.depth_metrics(raw, gt, valid)})
         fits[i % 2].add(disp, gt, valid)
+        scale_fits[i % 2].add(disp, gt, valid)
 
-    if global_ssi and kept:
-        params = (fits[0].solve(), fits[1].solve())
-        for i in tqdm(kept, desc="global-ssi", disable=not show_progress):
+    if (rescaled or global_ssi) and kept:
+        ssi_params = (fits[0].solve(), fits[1].solve()) if global_ssi else None
+        scale_params = (
+            (scale_fits[0].solve(), scale_fits[1].solve()) if rescaled else None
+        )
+        for i in tqdm(kept, desc="global", disable=not show_progress):
             frame = frames[i]
             image, gt = load_frame(frame)
             valid = metrics.valid_mask(gt)
             pred = _resize(_predict_one(model, image), gt.shape)
             disp = pred if kind is OutputKind.DISPARITY else metrics.depth_to_disparity(pred)
-            depth = metrics.apply_global_alignment(disp, *params[(i + 1) % 2])
             base = {
                 "sequence": frame.sequence,
                 "frame_id": frame.frame_id,
                 "valid_frac": float(valid.mean()),
             }
-            rows.append(
-                {**base, "alignment": metrics.GLOBAL_ALIGNMENT, **metrics.depth_metrics(depth, gt, valid)}
-            )
+            if rescaled:
+                depth = metrics.apply_rescaled_alignment(disp, scale_params[(i + 1) % 2])
+                rows.append(
+                    {**base, "alignment": metrics.RESCALED_ALIGNMENT, **metrics.depth_metrics(depth, gt, valid)}
+                )
+            if global_ssi:
+                depth = metrics.apply_global_alignment(disp, *ssi_params[(i + 1) % 2])
+                rows.append(
+                    {**base, "alignment": metrics.GLOBAL_ALIGNMENT, **metrics.depth_metrics(depth, gt, valid)}
+                )
     return rows, skipped
 
 

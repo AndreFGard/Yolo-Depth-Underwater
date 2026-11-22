@@ -94,6 +94,12 @@ The `all` rows require `--subset all`; the default subset produces the `arxiv su
 2 of 240 frames are discarded (too little reference). Reproduction should match up to GPU numerics.
 
 ## Adding a model
+
+UDepth-RMI is available as `--model udepth` with the `udepth` extra.
+Its inverse-relative output uses the shared disparity interface. In addition to
+the auxiliary SSI-aligned PNGs, it exports unaligned float32 relative-depth NPYs.
+See [UDepth setup, artifacts and results](udepth_flsea.md).
+
 Implement `InferenceModel.predict(images)` (BGR uint8 in, one float map per image out), set
 `output_kind = "disparity"` if needed, and add it to `build_model` in `scripts/evaluate_flsea.py`.
 Note: `YoloModel` loads a hardcoded `yolo26{variant}-depth.pt`; to score fine-tuned weights it needs a weights-path option.

@@ -1,0 +1,992 @@
+{
+  "repository": "https://github.com/AndreFGard/Yolo-Depth-Underwater.git",
+  "commit": "da0166ce07c2ac05a813ad122010d505d236acf4",
+  "subset": "arxiv-2507.02148",
+  "dataset_version": 5,
+  "n_requested": 120,
+  "manifest_sha256": "158d68528056062f7410ff922a4f805ab3777ed1e415006122d1e6cb9411cda9",
+  "selection": "exatamente o manifesto do repositório, na mesma ordem; sem nova amostragem",
+  "upstream_hashes": {
+    "scripts/evaluate_flsea.py": "3efac2224d2af03781fcfca8bb0854b540c055c275c79cb186c729bc88059824",
+    "src/yolo_depth_underwater/evaluation.py": "6281a4e664ab0e0515d89a6a71c777f543afd61f2f994d7945ced34d0bfd369b",
+    "src/yolo_depth_underwater/metrics.py": "ec68d2ff85e22065014b4f8a4e62f854ea6b8b973fe647b69b8950b74129aad8",
+    "src/yolo_depth_underwater/flsea.py": "282365e0e9bbc80d72c8cdb8a8afec1697eaa83074c767144aad8a85c845f9c4"
+  },
+  "metrics": [
+    "AbsRel",
+    "RMSE",
+    "d1",
+    "d2",
+    "d3",
+    "SILog"
+  ],
+  "silog_lambda": 0.85,
+  "alignment_space": "inverse depth",
+  "prediction_depth_cap_m": 20.0,
+  "min_valid_fraction": 0.02,
+  "global_fit": "even/odd cross-fitting from original frame indices",
+  "training": false,
+  "frames": [
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233051862684293",
+      "rgb": "canyons/flatiron/imgs/16233051862684293.tiff",
+      "gt": "canyons/flatiron/depth/16233051862684293_SeaErra_abs_depth.tif",
+      "rgb_sha256": "4bb317dbbd9011dda0c1b905e624b9b3e7105ccb24d945b5dd11a7726a2cfeee",
+      "gt_sha256": "0592eb94df440b7a741ad3c29e5291637552750d787bbe923269898508c564d4"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233051992616158",
+      "rgb": "canyons/flatiron/imgs/16233051992616158.tiff",
+      "gt": "canyons/flatiron/depth/16233051992616158_SeaErra_abs_depth.tif",
+      "rgb_sha256": "5c55c631165d8019bb3fd6d25832973c8e1b94960de2da0e63f3870ac95be992",
+      "gt_sha256": "280f07ff6c8b2fa7a6b06e56076bf20016d4db19a2ecdeb9e037b9bc64978cd6"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052123615072",
+      "rgb": "canyons/flatiron/imgs/16233052123615072.tiff",
+      "gt": "canyons/flatiron/depth/16233052123615072_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c446d96a38ddd9ccce01d29fec742ec267995b70d0e2e8f20e53f64cc5f7e10c",
+      "gt_sha256": "456ce07095a8847a6460d0a872151328873bbb02cbee54bbcc40730a1bc43e2b"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052253599570",
+      "rgb": "canyons/flatiron/imgs/16233052253599570.tiff",
+      "gt": "canyons/flatiron/depth/16233052253599570_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3174ec1330ea6abb9606a171204df882c4c6303b38a4c82b841cfb3149b1c688",
+      "gt_sha256": "d459c2246fd1cbce0b5ab08703b64187e62b9700f7a88af4d21764765f11b270"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052384648576",
+      "rgb": "canyons/flatiron/imgs/16233052384648576.tiff",
+      "gt": "canyons/flatiron/depth/16233052384648576_SeaErra_abs_depth.tif",
+      "rgb_sha256": "dc5a8f28e67552d9844c41dedc545663fb4734405d454ed081d395f1b3393353",
+      "gt_sha256": "39e19aa9a3c3c6d0d594f8576ffe649a9f02b665ab07a3547659f04ca008eaca"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052514691589",
+      "rgb": "canyons/flatiron/imgs/16233052514691589.tiff",
+      "gt": "canyons/flatiron/depth/16233052514691589_SeaErra_abs_depth.tif",
+      "rgb_sha256": "95cd3463ec8fd533f0edd30826d9296758c54b1ab5ff598c7bf1e9a82bd0702a",
+      "gt_sha256": "350d2a677a0ddf9e0a94117dc6d506c194d98a6fa49d0c8fb22d03025a0935ea"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052644547806",
+      "rgb": "canyons/flatiron/imgs/16233052644547806.tiff",
+      "gt": "canyons/flatiron/depth/16233052644547806_SeaErra_abs_depth.tif",
+      "rgb_sha256": "6164eb049230540ef34c2d9f808e4cef08f628e0a2f3724eb4ecf119a74960dd",
+      "gt_sha256": "8d93ebef0a72de7713d5c797f4d9de498388762249682e85f9e8ec7c082abb88"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052775737903",
+      "rgb": "canyons/flatiron/imgs/16233052775737903.tiff",
+      "gt": "canyons/flatiron/depth/16233052775737903_SeaErra_abs_depth.tif",
+      "rgb_sha256": "f393dd10cb3fb85641077b4b9846a4c16edeaf7e9546ec852c64f0a67fa3b12f",
+      "gt_sha256": "a1011094f54f0617e2c842702850f09cec34dfda5faa95a36abdb4fd31e6db31"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233052905628157",
+      "rgb": "canyons/flatiron/imgs/16233052905628157.tiff",
+      "gt": "canyons/flatiron/depth/16233052905628157_SeaErra_abs_depth.tif",
+      "rgb_sha256": "57f4fd6d473fc18fdd0e8d0e86e2a04f5ddfbc9936600efa18c1a7c86de53f7f",
+      "gt_sha256": "31b60df7e0e83c179194055cc52dd5a51b4612c15aab11748dc3ed463c542b79"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053035729609",
+      "rgb": "canyons/flatiron/imgs/16233053035729609.tiff",
+      "gt": "canyons/flatiron/depth/16233053035729609_SeaErra_abs_depth.tif",
+      "rgb_sha256": "03b774c4671a4848d0c4ca496a752bc2a9d4054df1aebea1eff0873649f950e6",
+      "gt_sha256": "2761b5ec1a661ccc7ef2613f4a3ff1591851e0aeb9453e4591e8c609bc502993"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053166683795",
+      "rgb": "canyons/flatiron/imgs/16233053166683795.tiff",
+      "gt": "canyons/flatiron/depth/16233053166683795_SeaErra_abs_depth.tif",
+      "rgb_sha256": "ab1fb7354d577df139da80ada141662684f7a1ab0695af7fb286da0755f90ee4",
+      "gt_sha256": "ab5ee55008aa515c42f9a408474fa920fe4956e5055f8d696d428f95e81b8c08"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053296641679",
+      "rgb": "canyons/flatiron/imgs/16233053296641679.tiff",
+      "gt": "canyons/flatiron/depth/16233053296641679_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c5b278a3b4613626902017ee6268c84a6dc0f921487df3d1869f53a20a4f147f",
+      "gt_sha256": "10dc6db4ebd75543177e52e2dd01a55883f3ea183a64b838f0005e08049f626b"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053426742690",
+      "rgb": "canyons/flatiron/imgs/16233053426742690.tiff",
+      "gt": "canyons/flatiron/depth/16233053426742690_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c130977fcaa0d09aa09e0b36c6a72417fc521c19a6dc67cd38de606002dfd0d6",
+      "gt_sha256": "6b0f57ff2a88fea8a093b075486c32d0047d4dd0f24ea87c35a0255a509ebb8e"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053556630712",
+      "rgb": "canyons/flatiron/imgs/16233053556630712.tiff",
+      "gt": "canyons/flatiron/depth/16233053556630712_SeaErra_abs_depth.tif",
+      "rgb_sha256": "04b5e02e601541c15eaed74d4eba3f6ba7129d444dd0fc8d5f89a1711456cdd5",
+      "gt_sha256": "00a65d7d6f0eb3348a9f73c9dd37386beb52341ea21ac6df1a8b232f0244cc8c"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053686737394",
+      "rgb": "canyons/flatiron/imgs/16233053686737394.tiff",
+      "gt": "canyons/flatiron/depth/16233053686737394_SeaErra_abs_depth.tif",
+      "rgb_sha256": "22355a07c917f78ded3a284e8a47e77a46fdd693492519371d83517224f9a91f",
+      "gt_sha256": "b095ecc1cc980de0a841f8c8a68e7f0388b024b4bfcf142e11e35c68cbe99d63"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053816603682",
+      "rgb": "canyons/flatiron/imgs/16233053816603682.tiff",
+      "gt": "canyons/flatiron/depth/16233053816603682_SeaErra_abs_depth.tif",
+      "rgb_sha256": "20034acbc32fc8a9b8bac3bfd0997585a2f9003c480ea0ed57d64a559dd7e464",
+      "gt_sha256": "802b584202c8c4228318ad7d23a855403f0044af0b87b0141f1a37f6a213dfa7"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233053949753354",
+      "rgb": "canyons/flatiron/imgs/16233053949753354.tiff",
+      "gt": "canyons/flatiron/depth/16233053949753354_SeaErra_abs_depth.tif",
+      "rgb_sha256": "0587f3525995dd38216f6a41b3a438ae308ac5488710df1ef4e0c728711028ad",
+      "gt_sha256": "10952a0505de447e9f55d0c415f87233f0ac771df60461f4fe661c2f526207e6"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233054079681213",
+      "rgb": "canyons/flatiron/imgs/16233054079681213.tiff",
+      "gt": "canyons/flatiron/depth/16233054079681213_SeaErra_abs_depth.tif",
+      "rgb_sha256": "58024123b752fac52a6519c614c38227a0ca4cd802946634d0d300ba96a4a6e6",
+      "gt_sha256": "d5282187b88dbfbcd10e1dcef7b85b52f6098657eea4fd15860059d20b4cb5db"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233054210737798",
+      "rgb": "canyons/flatiron/imgs/16233054210737798.tiff",
+      "gt": "canyons/flatiron/depth/16233054210737798_SeaErra_abs_depth.tif",
+      "rgb_sha256": "0a5ee2b6b7bcce4352483566b7ae6c191fd1c3927a983b66623c75f51be8462c",
+      "gt_sha256": "3dc4a5800891eddd510551728515c6ef1fdeccdc1caee958bcc7dbeddabe41b6"
+    },
+    {
+      "sequence": "canyons/flatiron",
+      "frame_id": "16233054342608783",
+      "rgb": "canyons/flatiron/imgs/16233054342608783.tiff",
+      "gt": "canyons/flatiron/depth/16233054342608783_SeaErra_abs_depth.tif",
+      "rgb_sha256": "dc5400d4a60d77f0d0cc786f8badcc99de97e06f016e4cae1920ab64b820af51",
+      "gt_sha256": "984ed0ba5bc4862316e00f3964f90f773656f5cf5a4c394f82040a543d53ea50"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233043763678300",
+      "rgb": "canyons/u_canyon/imgs/16233043763678300.tiff",
+      "gt": "canyons/u_canyon/depth/16233043763678300_SeaErra_abs_depth.tif",
+      "rgb_sha256": "12c247bae44e71cffbf74839e431a5b8712bf364b7693d489bf27f750f3d4cfe",
+      "gt_sha256": "893a9c8dd851adb02882fae7b654df1d46f4ade0323eb841b1fe542b3bcd0f40"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233043915588462",
+      "rgb": "canyons/u_canyon/imgs/16233043915588462.tiff",
+      "gt": "canyons/u_canyon/depth/16233043915588462_SeaErra_abs_depth.tif",
+      "rgb_sha256": "13709948ac0ddab55d3a5f81d3780c7118f8af8d2228fcbb9a158e8ed8ee2952",
+      "gt_sha256": "9974c4ce378372d402088b03e3b0b7db661e48751bd1ef38e45c156c0f99d864"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044068727612",
+      "rgb": "canyons/u_canyon/imgs/16233044068727612.tiff",
+      "gt": "canyons/u_canyon/depth/16233044068727612_SeaErra_abs_depth.tif",
+      "rgb_sha256": "0f54479e720d13f99bde904dea91d0ec52827b61697d95a2616e245324f0c165",
+      "gt_sha256": "2137963870cf675ffd89733bdfda5460ef12acc36d9bd108f8b06093560ad62e"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044220634053",
+      "rgb": "canyons/u_canyon/imgs/16233044220634053.tiff",
+      "gt": "canyons/u_canyon/depth/16233044220634053_SeaErra_abs_depth.tif",
+      "rgb_sha256": "6408efb25abf0e17a7b72d5ab47e5ca600de7a41039e1ae75e10b5cfa69815a7",
+      "gt_sha256": "1eaea20e5cc141b596b86de0c3315da9b6b69500c80ff8e1a6f66bd3d3623de2"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044372659986",
+      "rgb": "canyons/u_canyon/imgs/16233044372659986.tiff",
+      "gt": "canyons/u_canyon/depth/16233044372659986_SeaErra_abs_depth.tif",
+      "rgb_sha256": "98ee883729ef5ccb136006a0899ded1877259a2ca63a1a646a877aac6d51e216",
+      "gt_sha256": "ae9950a3197052ee8a7aa8ef4c9b0e5a06613205437a8f749846a1b3f52b0a48"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044525739195",
+      "rgb": "canyons/u_canyon/imgs/16233044525739195.tiff",
+      "gt": "canyons/u_canyon/depth/16233044525739195_SeaErra_abs_depth.tif",
+      "rgb_sha256": "d8fdd66633df3a09a880c82329df17b999224ce215703fd45e858d3e082b4c7f",
+      "gt_sha256": "e6e49876f87fe5c592f53b057e8e4321c872c9899b34fe2940195baba5281dd5"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044677786074",
+      "rgb": "canyons/u_canyon/imgs/16233044677786074.tiff",
+      "gt": "canyons/u_canyon/depth/16233044677786074_SeaErra_abs_depth.tif",
+      "rgb_sha256": "adc56364b30582b0c4b6bb7d8997d02c0c9dca84357f1071dd1f0b0c46593245",
+      "gt_sha256": "32cbfbf3a2d73240b92f6d0753b78a89722a7b7f3087f2d00aa1b536c322aff2"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044829926610",
+      "rgb": "canyons/u_canyon/imgs/16233044829926610.tiff",
+      "gt": "canyons/u_canyon/depth/16233044829926610_SeaErra_abs_depth.tif",
+      "rgb_sha256": "15447b124610aa9b811fe0f6bcd675679f2067df974f6c55122374faa8da8cef",
+      "gt_sha256": "e615c963b5259628eb546ce2705a4d4201effc89efc7f3a20b95c94c242244e8"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233044982773926",
+      "rgb": "canyons/u_canyon/imgs/16233044982773926.tiff",
+      "gt": "canyons/u_canyon/depth/16233044982773926_SeaErra_abs_depth.tif",
+      "rgb_sha256": "01fda87a29164827a3f6e707b2e8d99116835675a1198f50e34246d95e078e56",
+      "gt_sha256": "7aa091ea9e8c92ca192312376c3b8e616fd511636495d0a8447227403ec2b926"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045134740999",
+      "rgb": "canyons/u_canyon/imgs/16233045134740999.tiff",
+      "gt": "canyons/u_canyon/depth/16233045134740999_SeaErra_abs_depth.tif",
+      "rgb_sha256": "d521717b015de5b1775d5d1ae7d1b03f0985eb300e03ac969b8cb754aceb2040",
+      "gt_sha256": "805568737bf7e5315e64937cf1cd9698a5676c14ff2f5609f5911b06a6750408"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045286632831",
+      "rgb": "canyons/u_canyon/imgs/16233045286632831.tiff",
+      "gt": "canyons/u_canyon/depth/16233045286632831_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e94e9178560b10e5e3a8fcc72c082d98f8035adea755eb41e4236c3daaa50c41",
+      "gt_sha256": "dd4343a129188a375f660fa825b6033cc5f768a083ed147b2a700978069450b9"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045438690631",
+      "rgb": "canyons/u_canyon/imgs/16233045438690631.tiff",
+      "gt": "canyons/u_canyon/depth/16233045438690631_SeaErra_abs_depth.tif",
+      "rgb_sha256": "36516d3089b49b547b0495a5b27ed8e8a3a0228172b9423ae5c2513784247e03",
+      "gt_sha256": "987fc15bb056a972c7f7c769a3446b5a36e535df4bd8f62b7074bea30b0659be"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045591715016",
+      "rgb": "canyons/u_canyon/imgs/16233045591715016.tiff",
+      "gt": "canyons/u_canyon/depth/16233045591715016_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c734a262905e6d0041b0c600a03933f25fa5a3e308881bf475d49bc78009b8c6",
+      "gt_sha256": "1e86f475dd461e4848445f06cad7f44e3e2c5758d2a2d3deefb6e6b09673a841"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045743618076",
+      "rgb": "canyons/u_canyon/imgs/16233045743618076.tiff",
+      "gt": "canyons/u_canyon/depth/16233045743618076_SeaErra_abs_depth.tif",
+      "rgb_sha256": "4e0e0969037d88a7d7676fc9146b4cc9d108a95537617e0087e697694fc58f8b",
+      "gt_sha256": "f8d479ec06f3567027e8fb9512feb58cf7f60690971b89745d944386b058c210"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233045895708096",
+      "rgb": "canyons/u_canyon/imgs/16233045895708096.tiff",
+      "gt": "canyons/u_canyon/depth/16233045895708096_SeaErra_abs_depth.tif",
+      "rgb_sha256": "5e8b1a37d85c75c3fee95f19ed165daa0a1d67ed29d5564ee38836cc74473bcd",
+      "gt_sha256": "67a8ee4af8e257e5aaffb8f68c6abdaf1c47c8b15c9b14c17d3c5e5bd07ed55f"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233046048751557",
+      "rgb": "canyons/u_canyon/imgs/16233046048751557.tiff",
+      "gt": "canyons/u_canyon/depth/16233046048751557_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3e653454c5af8a77101c4338963f42f5f690b79dae4bd7a19cf40d57e07a6d02",
+      "gt_sha256": "94d01da197c27573e8d548cbde163204f55e949fc41de7cfb48d51929764dcee"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233046200697925",
+      "rgb": "canyons/u_canyon/imgs/16233046200697925.tiff",
+      "gt": "canyons/u_canyon/depth/16233046200697925_SeaErra_abs_depth.tif",
+      "rgb_sha256": "82b2a9bf6bb36edf1d4ea31aefce5cb1b09515de5a78c96e9a3a94b84caeedf6",
+      "gt_sha256": "234a653b72c6dc0fb98987208708b0753c0be971703d919e4265477cef9f231d"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233046352610686",
+      "rgb": "canyons/u_canyon/imgs/16233046352610686.tiff",
+      "gt": "canyons/u_canyon/depth/16233046352610686_SeaErra_abs_depth.tif",
+      "rgb_sha256": "f9516f88e412e73e703daf09ae0d3c0fbf40be65a4c1a103f936fdd1e0320715",
+      "gt_sha256": "95c5056975d40c176d23108a1f554624da8b08e09c8215a4b2776bdcd2695d07"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233046505904520",
+      "rgb": "canyons/u_canyon/imgs/16233046505904520.tiff",
+      "gt": "canyons/u_canyon/depth/16233046505904520_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c92257c275da29935a0649f0086d934e6bf8a8df8ff759aa0b5cf14cce0b32d1",
+      "gt_sha256": "4c7b5c9a11e75fd14e268f299c064ddd5c503d81a0b550817d50bd6a6fc3051c"
+    },
+    {
+      "sequence": "canyons/u_canyon",
+      "frame_id": "16233046657681034",
+      "rgb": "canyons/u_canyon/imgs/16233046657681034.tiff",
+      "gt": "canyons/u_canyon/depth/16233046657681034_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3fbd7119d8b4c52b79d77d02ea6be3205a2aeb3f14747de19ad7f2850efe33de",
+      "gt_sha256": "8720b9ae451755063da4e1bf335b4c5453d58c8eaa5285b5a7431a8913d44d8c"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316007748831346",
+      "rgb": "red_sea/big_dice_loop/imgs/16316007748831346.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316007748831346_SeaErra_abs_depth.tif",
+      "rgb_sha256": "d8ec9581e7fdf49a58859956266f748db495e81a0088457ccfa655779a73d778",
+      "gt_sha256": "c748f231bb5d0d4165bce38eb82640597a7884b2355387af895e8d52b55e0c94"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316007917099140",
+      "rgb": "red_sea/big_dice_loop/imgs/16316007917099140.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316007917099140_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c151e1db68d1aa59dbd5c0c1efa8dea3c43b85396b60e57eb83c087d50422034",
+      "gt_sha256": "055477d8a1fddd10f98c76eae5c8e6a7d53137878b601c33363e82236aec434d"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008083912961",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008083912961.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008083912961_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e327026597c11423535139114a0fe4cb313f7b92075b035203626e1bcc13b7f7",
+      "gt_sha256": "43965ab15fea270097b26f5ca41310a8ad412a94240b3725e8b655b750e8d77a"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008252826388",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008252826388.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008252826388_SeaErra_abs_depth.tif",
+      "rgb_sha256": "687a473eb1ab1044c37b7f4b750dcdd730e5258fa7e54d2c93ea34a4841eb447",
+      "gt_sha256": "719e906b93645871831e6860d7ce07c58f7ce18580229b7dfd5eaaa4eae74b82"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008421223979",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008421223979.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008421223979_SeaErra_abs_depth.tif",
+      "rgb_sha256": "9e5f5b5eda2b16de5f5976174809edf465c6b99549a1aad18e5fcfe90c49e402",
+      "gt_sha256": "0b5c8d217b39332e724871a28fbcc5e88e4d8293c6db101dc0288bbf65d96e03"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008587867324",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008587867324.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008587867324_SeaErra_abs_depth.tif",
+      "rgb_sha256": "7b2a57c3c7bcffc1143e282c70acde2023ab794241be00f007f9491457d19e35",
+      "gt_sha256": "a6404ce582de4661dad6fff218b82a747c9acca2fc281b976ef7530a94baa8a9"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008756048539",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008756048539.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008756048539_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a52edd63528a5a04d5500da689890cf5f8ee312b2ecef952bc65c9f93caa24b2",
+      "gt_sha256": "fad9c163ac6363bbbdd0efe9c7e19dda8af6a1b5cc6acf10be039ea8bb659f1a"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316008924775882",
+      "rgb": "red_sea/big_dice_loop/imgs/16316008924775882.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316008924775882_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e466b5463587febdf2b5f99deca528ecbf54f73e6b98b2e748c038e659030447",
+      "gt_sha256": "1b94548d4ef29dece786002d1032a302dc2ae821cb5d39292eeaf037468fec2d"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009095053282",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009095053282.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009095053282_SeaErra_abs_depth.tif",
+      "rgb_sha256": "617e3a186a589a9627b77a9d1a3e33fdc3397c19b3d03fe27950bc885e5bdaea",
+      "gt_sha256": "a34c4e6227ca7d1b05609021b7ea0d4a04d6c647de4cc7d076e073d13b7e0759"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009260861897",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009260861897.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009260861897_SeaErra_abs_depth.tif",
+      "rgb_sha256": "67dec54bbb780c409926cbcbfa30ae9a0b22e6ada6367abfc045d542a0ab6ef3",
+      "gt_sha256": "3b16f0d80cffc589300e1f01460d51d52959a7921d6becc418b252fc796b3d7a"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009429935770",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009429935770.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009429935770_SeaErra_abs_depth.tif",
+      "rgb_sha256": "39d29aa0a11f31d7220591cd9c1c78218db7464d2b77395a67567d75bd10bb30",
+      "gt_sha256": "f72c8a2bb2847e00e7cd002236cf488d3ee914085ca85d54f7902c1f1d7df408"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009599938345",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009599938345.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009599938345_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3e79291923cd3fb06258d02f43b27e60f8aa8cebe6809a327545ce8dcfc919cd",
+      "gt_sha256": "a50e82ea89b15f9c4f6678b2e080f50a15795bcd75fe264cb922ad7284bab604"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009769883931",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009769883931.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009769883931_SeaErra_abs_depth.tif",
+      "rgb_sha256": "867bbfe91b0744bdc606ed383c36817e1a265c3f64c488bc4d8e0a4ebafb060c",
+      "gt_sha256": "860e24d831614907992bf69f2a3aec2ee870a6d1ed02640053e512cde72414bc"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316009937144644",
+      "rgb": "red_sea/big_dice_loop/imgs/16316009937144644.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316009937144644_SeaErra_abs_depth.tif",
+      "rgb_sha256": "b451fe58c0f58a7f29e09b4fb9460de8cac979e048da6c8eac400a83510459e5",
+      "gt_sha256": "94683396788e9923c6016781c6414877c3f3ad71b420e94034c34538eecc0073"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010103973711",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010103973711.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010103973711_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a94f18c0397dc2985c93d386388e875c0736786834aafd531bfc14aa1b49445d",
+      "gt_sha256": "981667bf35d50d250c4a779e1e8b6c8e1aa07ad52ec6849e0c0bb548515042c4"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010273115048",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010273115048.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010273115048_SeaErra_abs_depth.tif",
+      "rgb_sha256": "d9ed648586f34f78ef28a2b193bbada6fca68abbb59959f50c24b923e4f3254a",
+      "gt_sha256": "54b188cb533e7029e120c5222ccc69b8deb7b1cbea3ce638c6115677f74b2689"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010439863875",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010439863875.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010439863875_SeaErra_abs_depth.tif",
+      "rgb_sha256": "343b1798374e41fcee467d1bb721797b899a25e17b23b735f308c1bc55def86b",
+      "gt_sha256": "6ffbc482264ddfd05386edb654ee1a1fb12dad280764e9674cf3c89d4d7ed0b1"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010608019850",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010608019850.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010608019850_SeaErra_abs_depth.tif",
+      "rgb_sha256": "ec352c59df38397af5e06630a6213d3384813a525da43c346e7831ad4e53c2c5",
+      "gt_sha256": "3dcd4f802aa53e8b81495968fcc5489f30dbb748a9ca2ea9b2caba05c361b50f"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010777962701",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010777962701.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010777962701_SeaErra_abs_depth.tif",
+      "rgb_sha256": "24d915b1378f8cc4e0845aa856588ad6f962c1b979420b7ab1e4bf7c7641cfc0",
+      "gt_sha256": "9238f2488572074463c54f13cfca6eaaf8d53cfb98cd466fbbef4b6dc05f1b31"
+    },
+    {
+      "sequence": "red_sea/big_dice_loop",
+      "frame_id": "16316010948896842",
+      "rgb": "red_sea/big_dice_loop/imgs/16316010948896842.tiff",
+      "gt": "red_sea/big_dice_loop/depth/16316010948896842_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3806611fc43205d96cc5e58259a8cbaff4b0099f5ca0d68dbf6f3412d1b4fecf",
+      "gt_sha256": "3332451fef6b6189d1a7e9da0cc40e9335084c119cf2d857dcb4dfaea538c34c"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955232437742",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955232437742.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955232437742_SeaErra_abs_depth.tif",
+      "rgb_sha256": "cb50814b096e8139d04590ddaa758a9a879924ff994b404d594789a41ee4618e",
+      "gt_sha256": "02087f4d08c4f7ca9af68071363c9fea740b12b1a254b40eef303210c5f7f5f2"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955287355382",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955287355382.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955287355382_SeaErra_abs_depth.tif",
+      "rgb_sha256": "917fe1b44a72440543a7c499af2b190554bb866405a13b42f91cebf226b18996",
+      "gt_sha256": "46d68b6e925664dcd499cce8a39dc681628d5ecf9838cddc3b2638f10125a01a"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955343634257",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955343634257.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955343634257_SeaErra_abs_depth.tif",
+      "rgb_sha256": "fe83023335c2c44c3886fa315a533d723e7bf9da8ae08e34d16a9f283019334d",
+      "gt_sha256": "93752c171177ebc0d318d939bf902cf224b09f5d4c9a7636c747f0a1748e6505"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955396366384",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955396366384.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955396366384_SeaErra_abs_depth.tif",
+      "rgb_sha256": "9c69b0ea61e7a501f08dd018131a33640fe1524b6b2841691e8a07b43cf49561",
+      "gt_sha256": "0d2053a8d8275397c6125cd3943f0b566446c2fa76737f4c6e09a2c566c8479e"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955450436666",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955450436666.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955450436666_SeaErra_abs_depth.tif",
+      "rgb_sha256": "bd5c7f35e66cfe06203326bcc8ef5f5f48372045b1d62de0ce89c1032fe675d8",
+      "gt_sha256": "7c0d9a2e6af9a1d2e2962f644ba6906c46e05e2143191285b69a208af7f35e02"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955503361611",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955503361611.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955503361611_SeaErra_abs_depth.tif",
+      "rgb_sha256": "79f1d465d12640a95b4bbaa10a28fcccc31f5d788316fe89b54862ab950044bd",
+      "gt_sha256": "9b152a76b03da3635ef1a558184ed23f1757afdb01028eb836457e2abd879d54"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955559454491",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955559454491.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955559454491_SeaErra_abs_depth.tif",
+      "rgb_sha256": "9787f6ab2ce25afdcaadc321e9658d19352433214bad0e70e45c04acc4dd6c93",
+      "gt_sha256": "15f79aa758c57837150b21cc8efbb19935e7fcb9b1741fc397a8033690f3996e"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955612481179",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955612481179.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955612481179_SeaErra_abs_depth.tif",
+      "rgb_sha256": "92af99e96d0e3fbe09d8abd2e623505a45118e32a82c8cd9408d870d0070ccb5",
+      "gt_sha256": "a1f7bf31a1f24d01a99b0ce311497de24824d994821eff844c9c8d74e88e2f3e"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955667473564",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955667473564.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955667473564_SeaErra_abs_depth.tif",
+      "rgb_sha256": "8247a24417733a79d591f706e7bdf2fd4ef61cf95df1a8a4ba462a401fba7096",
+      "gt_sha256": "ef37db09984d68db50f061492695e23a8ba97565f663492e863ec72a80c03f62"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955720324602",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955720324602.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955720324602_SeaErra_abs_depth.tif",
+      "rgb_sha256": "42b5b1608b8820c5aa15ceae6c7b08c9b2d037bd0d36960e40a4ba6d8d302fe5",
+      "gt_sha256": "de0ed427973d4222b55a61051ab406beaa4e66a61240f9eea3afeb20483a4e98"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955774525311",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955774525311.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955774525311_SeaErra_abs_depth.tif",
+      "rgb_sha256": "22d13f0f452e9d766fe4d33746c556012511395bba56fa6e001e55d87cd5121e",
+      "gt_sha256": "5714e2f9ee29afd31ccc162613af9cda2022e2eb6ce501af2d2d4a2a1312a470"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955828459477",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955828459477.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955828459477_SeaErra_abs_depth.tif",
+      "rgb_sha256": "920a266415bf913f0ea7d65e1cda06dc8163494b40469d0d47d77485015e59e0",
+      "gt_sha256": "22797a4d8fcab23fc334ed529d25de8b9a70d69086b652254529af8d4f1ad9f1"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955883311765",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955883311765.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955883311765_SeaErra_abs_depth.tif",
+      "rgb_sha256": "b88d2a7a0570d4f3ccc58e153377d9c054034f7a5c4b25ed89162d70d5f16fe6",
+      "gt_sha256": "10c5d75f6587e6444dfc812175cfb5f90a8e58336b8d9e351e163aea5013338a"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955937610748",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955937610748.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955937610748_SeaErra_abs_depth.tif",
+      "rgb_sha256": "65e9cc477e924234047a577e214939f2d8e609427659e996ddf6330bb7dffb51",
+      "gt_sha256": "8b7d9003c8a6026c9960c7ceae0fd25b0b324409a02cc3cee6cff1a9807a1716"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315955991326485",
+      "rgb": "red_sea/coral_table_loop/imgs/16315955991326485.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315955991326485_SeaErra_abs_depth.tif",
+      "rgb_sha256": "6103d4c8b24f1ad6792e7b5c60a4ec67f07b1aa9d0b89092b90edf47fd30bf17",
+      "gt_sha256": "441844b384e76c49a6970dbc08b51fedf57a0160cca80b12ddb16032f863dcad"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315956045401235",
+      "rgb": "red_sea/coral_table_loop/imgs/16315956045401235.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315956045401235_SeaErra_abs_depth.tif",
+      "rgb_sha256": "09a85a70d704054962b7f6abc33a1d3ca75201c65e9c4045ecd24482db40e75a",
+      "gt_sha256": "11eb6ec14eb1fad3f17b5f7910f911e5880fdba994a6b7b9d2d269a7bed02406"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315956100528035",
+      "rgb": "red_sea/coral_table_loop/imgs/16315956100528035.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315956100528035_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e696e462cb00b82958d28f941530e045abc108d53b645b8b393b31c7c3d58a32",
+      "gt_sha256": "e9faf7437655f32d68db4e33f6d07ee537a60f63eff345f989fa83df736bb460"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315956155373080",
+      "rgb": "red_sea/coral_table_loop/imgs/16315956155373080.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315956155373080_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a7cd32998743a4f1c62cba78790923dcb0ab49bc84255d2bd4ad4b63ca366629",
+      "gt_sha256": "e8195c47007be6a8ddf8d76da784496ffc792195dbb23ec5cf5b4b9ff237b55a"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315956210460877",
+      "rgb": "red_sea/coral_table_loop/imgs/16315956210460877.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315956210460877_SeaErra_abs_depth.tif",
+      "rgb_sha256": "b9c6826068632160fb4b985b565670f7910f7e563d594abcb8d2b864267ff814",
+      "gt_sha256": "3e193e22a7e38ba2aee84c2a388de285aaf91b2bae6639b4299937ab81ff62fb"
+    },
+    {
+      "sequence": "red_sea/coral_table_loop",
+      "frame_id": "16315956264349985",
+      "rgb": "red_sea/coral_table_loop/imgs/16315956264349985.tiff",
+      "gt": "red_sea/coral_table_loop/depth/16315956264349985_SeaErra_abs_depth.tif",
+      "rgb_sha256": "4653588a15149b799efca81f005a51b7ab942e30e5022299e3ef0119a60b375a",
+      "gt_sha256": "c00572e3ea018806f22dd3ce121e9593c0cc33034a30ab88559e0a9eefb2456d"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964096184783",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964096184783.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964096184783_SeaErra_abs_depth.tif",
+      "rgb_sha256": "1a8edc30d7d5116e573fc7977a8a9efff6008fb7a09ae1cf2f8effc23a755748",
+      "gt_sha256": "f1827681a695185f7ca96306c283766b4f9105c7952542f9e8915919b8cea238"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964182946405",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964182946405.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964182946405_SeaErra_abs_depth.tif",
+      "rgb_sha256": "5b1fcbb0be21f7bd36831788510f1258c897a12e4a78711e5d2dc19bebfe8d6c",
+      "gt_sha256": "125afb3f42e1658d5ad34c6d49427d5dcc798af18f3e30e91c4b3c2b06189f26"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964271033759",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964271033759.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964271033759_SeaErra_abs_depth.tif",
+      "rgb_sha256": "77c34038581f198f7728579a659ecd9a5d16f38811e9ee56ff010b281fa33639",
+      "gt_sha256": "8f65b397f5971137fc04430bea011515125c07e9a7167b113a699a53cc727e83"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964358909461",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964358909461.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964358909461_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e2f4b8aef0c1493898535e661a778cb44f01790aa41466be619f95de9610717b",
+      "gt_sha256": "b8a41054936fc41c45d57a4b86514a8706a775564f88b40c905608680c6c7bf3"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964446949503",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964446949503.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964446949503_SeaErra_abs_depth.tif",
+      "rgb_sha256": "2212eb10ca02cb56afc6ba33ddd40b5545728d134ac6c9f08b8de47a9317ae88",
+      "gt_sha256": "d5c334068099395dd5ccf83715f62bd16fe086844c52aaaaab2d136f1b1a52eb"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964536044118",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964536044118.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964536044118_SeaErra_abs_depth.tif",
+      "rgb_sha256": "145ef133620e9f59ef5b1120b62e5ac9a3e100db4b100162e2a06c3244750ee2",
+      "gt_sha256": "db9b622ed798b55a4a03de37b192b35079150276c27715f056894eedae5cc155"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964625034125",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964625034125.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964625034125_SeaErra_abs_depth.tif",
+      "rgb_sha256": "cfb5ad1e5438f699e278b9e9196893db73a0a16c6cb3a43d39350cefe588280f",
+      "gt_sha256": "d42ac6cbc66cd7965d216caf052d313f503a91eb929d19dc754e9ca4b2b187af"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964713038666",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964713038666.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964713038666_SeaErra_abs_depth.tif",
+      "rgb_sha256": "66ac7fc3d65143200dc166d27dbd7f338772f7ce6c0e806b0eb062f184de8006",
+      "gt_sha256": "5e4ab09c05608997fe739d6797790628263f841a859df521ab1b5b4d5bbe927a"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964800867889",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964800867889.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964800867889_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3f7bd00c899285c9cc4fbf056badc648dd9d6dc6562a77066114b52320de4a80",
+      "gt_sha256": "436be4cedb78affde81e9b098c5e6a2c8cee02d9c6a6bafb1e69524bbe5f3ccc"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964889972630",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964889972630.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964889972630_SeaErra_abs_depth.tif",
+      "rgb_sha256": "67f2fd848bf06a21cde494744566eb04ac0ce14308fe9d6f2a2cbbf4df852b58",
+      "gt_sha256": "0bae462823a9e8f1e8a7a85029552f6217d7f94f591e0edd6784b3a671ad7bb0"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315964978015883",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315964978015883.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315964978015883_SeaErra_abs_depth.tif",
+      "rgb_sha256": "4de8dee71d75b05844f00711fbd95bcf15816aa49416b3906583d3b355b2ee44",
+      "gt_sha256": "6f666c5195bda0d9df8fdd15968468c7210a86ff4c673742156380e33b3a2190"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965065983763",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965065983763.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965065983763_SeaErra_abs_depth.tif",
+      "rgb_sha256": "7e360d3e345707cd08c4a58703032bbaa6873a0b44a2ec5c5202afc766b40539",
+      "gt_sha256": "41706cfe58febd58124cd7feba86471791988a5daa90b43b7d0d221b1d0dd570"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965154993572",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965154993572.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965154993572_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a3c761ee40d69d0c6ce6fca2cc733f15bc83aff1b448021bcd410a912d3b8693",
+      "gt_sha256": "11c5b6378a48f956d059aa20e295c890cbca6c68f71910ce896f57c03a6029b2"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965244897954",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965244897954.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965244897954_SeaErra_abs_depth.tif",
+      "rgb_sha256": "0ff0f4e929057e83999d886751a142796c16b19e5e639768a38f79dc5032d0c7",
+      "gt_sha256": "74ba521ab80026fb50a5032bb8cdeee8446a0cd66b9bdf54a9bfe2954810d826"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965333030870",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965333030870.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965333030870_SeaErra_abs_depth.tif",
+      "rgb_sha256": "de8fec43f555541ada8a4166c74fc2fc38dbb292436a3f63d91cfabf5ee2b5d4",
+      "gt_sha256": "de17fcff2078972d3d3817e259205a0d6ae1010f3b161c513bba5be6ab7321e2"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965420934057",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965420934057.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965420934057_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e49ae81f0a6e54f783ac700d548391f547bd00fdcfd0a1a76114c7a69fcd587c",
+      "gt_sha256": "c4cc2e33cdc7f72f9b42b20102dd7616706d4b26c6d64e08941ebd71d63351ea"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965509874213",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965509874213.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965509874213_SeaErra_abs_depth.tif",
+      "rgb_sha256": "9c37a333ffcfcdd1c215057de8eea3859cbe85994f1a70be99dad6a9f4e6e1e6",
+      "gt_sha256": "e55a83d0c9cc892496f3dccd2418be22db5b83433f04587462962519fabefb83"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965599953017",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965599953017.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965599953017_SeaErra_abs_depth.tif",
+      "rgb_sha256": "514fec5ddbae8bff2ed94c9e10189c77201f1a4c2a3e84bfc583e723b60a7ddb",
+      "gt_sha256": "e67f2e1c415734befa031a76c3cbeec1c19b293366172589b38bd4ec07495719"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965686938825",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965686938825.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965686938825_SeaErra_abs_depth.tif",
+      "rgb_sha256": "18c93106b7eb02b44e4a1801876a3585a9244687b7b44a0c9fcc2e188e35a964",
+      "gt_sha256": "2a17503bfc447954659fd9045f6220a07d820b34aae6285f9df1a8e968d448a0"
+    },
+    {
+      "sequence": "red_sea/cross_pyramid_loop",
+      "frame_id": "16315965774934826",
+      "rgb": "red_sea/cross_pyramid_loop/imgs/16315965774934826.tiff",
+      "gt": "red_sea/cross_pyramid_loop/depth/16315965774934826_SeaErra_abs_depth.tif",
+      "rgb_sha256": "fe0083fd7a1684357f68afda3bbf55709ca157dc8d0d4aa9bfb2f7ca1d93cc5c",
+      "gt_sha256": "03a05e6e7f05ffd276a61d1ded1633406bab157d4d93256ef53ca11909790e15"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026388705614",
+      "rgb": "red_sea/sub_pier/imgs/16316026388705614.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026388705614_SeaErra_abs_depth.tif",
+      "rgb_sha256": "80dce2f2502961a6b96f4ff7b97005fbab3808bec89df0961dfa4c2fc0be2175",
+      "gt_sha256": "f8bf93a593d9daab5ab6a49fe4740770afddcee852d7cb20f054aa6dbeedb479"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026445681906",
+      "rgb": "red_sea/sub_pier/imgs/16316026445681906.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026445681906_SeaErra_abs_depth.tif",
+      "rgb_sha256": "bfb49fae2329d3986ec82cdd767450f8faa39a27f10e74eceaeb7d93087cafe7",
+      "gt_sha256": "39271bd6b26c365544b7afa9addf86d562333657bc3e49fdb6d53192daaecffa"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026504732211",
+      "rgb": "red_sea/sub_pier/imgs/16316026504732211.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026504732211_SeaErra_abs_depth.tif",
+      "rgb_sha256": "e29d56281e2a497857ad112ca9456304e7498863edae5bb4224b91ffc9b6c272",
+      "gt_sha256": "ffebd4eab6f7c34f3f0a15ddae34442aefc375bdb783faac6b4adffdf03acc78"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026561779130",
+      "rgb": "red_sea/sub_pier/imgs/16316026561779130.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026561779130_SeaErra_abs_depth.tif",
+      "rgb_sha256": "b97e7c2f909ad9bd7dc29b852f24083e6081f95b52072c436f66627a720a11a5",
+      "gt_sha256": "5a469547d689ab36605ad57663ee7550c1c50fe41ff482c25afd37849c7a4cf3"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026618865325",
+      "rgb": "red_sea/sub_pier/imgs/16316026618865325.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026618865325_SeaErra_abs_depth.tif",
+      "rgb_sha256": "3d6feacaef6ce0a39506aeabd1e0dbbfcf26149ac677e8e4b62cbedf29a3b43c",
+      "gt_sha256": "24a2f255fa51b319bfef0ab366bb09a32b906cbd4eb5c703fe0dea8a95d3e811"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026679753270",
+      "rgb": "red_sea/sub_pier/imgs/16316026679753270.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026679753270_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c3027b645d07843136ab1baf0b664fa5bd25cd3876b6b54b0696796acdee7c69",
+      "gt_sha256": "af7c2c642b8399c285e6db7a763bcfd9cdc46aaba9e7c8adce30d8325bfef4b9"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026736708965",
+      "rgb": "red_sea/sub_pier/imgs/16316026736708965.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026736708965_SeaErra_abs_depth.tif",
+      "rgb_sha256": "c5e47dd8703ed55635941fc8c182a156b70dd3bbc37472c6a69156f1d5172b9a",
+      "gt_sha256": "96258389838ce01e3b98aba3d8e875900ae914d34b263b1fada1e11621c4367f"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026796976709",
+      "rgb": "red_sea/sub_pier/imgs/16316026796976709.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026796976709_SeaErra_abs_depth.tif",
+      "rgb_sha256": "42fb6eb7c9757f27455ac5607c7be1ed948018b9a7aef27f089c87923c7e0b6e",
+      "gt_sha256": "00ccf92011114f38a3c36f7dd046698464dfa5991c344cb4336e21c7b209fccf"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026854888678",
+      "rgb": "red_sea/sub_pier/imgs/16316026854888678.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026854888678_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a4e4c82598113ba5ebfa3435475f3b65e4ac0074845dac84b922016abe5a4bab",
+      "gt_sha256": "1253f43b5328223a99f13f18f7ed47b6df9724b34635b9ee0c8a1fe4246cb5e2"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026932740226",
+      "rgb": "red_sea/sub_pier/imgs/16316026932740226.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026932740226_SeaErra_abs_depth.tif",
+      "rgb_sha256": "23af077f0358d3364c5d3df745596b20f251b3fdf2f6edc9d0496b65dc2d0c7d",
+      "gt_sha256": "365cd2812c5f2f44a02cd894804a1bad98a421e638ab17adbfcf77187578988b"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316026996144829",
+      "rgb": "red_sea/sub_pier/imgs/16316026996144829.tiff",
+      "gt": "red_sea/sub_pier/depth/16316026996144829_SeaErra_abs_depth.tif",
+      "rgb_sha256": "deb2bbbd39be5e0353263981d8633376e94b11b83a5bd901faa37670df95f2ae",
+      "gt_sha256": "a4bf34ee63aed259144abe1dc9e4f76b6f41377da8992873f618cbecd4e994f5"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027052731581",
+      "rgb": "red_sea/sub_pier/imgs/16316027052731581.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027052731581_SeaErra_abs_depth.tif",
+      "rgb_sha256": "2b5a8bf30e2f5957a024734ba45219760f3a2c56d1c8b2dc1ccc9354207b4d9b",
+      "gt_sha256": "ddb3992aeccd939e1a61f691be896e52ea0db71c8a782287eaeabcf095aa86ef"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027124053478",
+      "rgb": "red_sea/sub_pier/imgs/16316027124053478.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027124053478_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a86086ddc53222a53ba9497bdcadf0e2b5482067901aa1cfc2aff8a5fd3a3c44",
+      "gt_sha256": "7ac15a68554bdcc3225253efeaa2c864ad9d7c7872294cc3aa4fc13b17a3c82a"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027182933240",
+      "rgb": "red_sea/sub_pier/imgs/16316027182933240.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027182933240_SeaErra_abs_depth.tif",
+      "rgb_sha256": "1c06a1901559f58ba984fec369ab63b336e6691d8394d01502c3edea1a2648e4",
+      "gt_sha256": "f8d61bf19a8425311e651c337df5d557bf2911e19329d2b6a5acea452b2dd0dd"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027239758995",
+      "rgb": "red_sea/sub_pier/imgs/16316027239758995.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027239758995_SeaErra_abs_depth.tif",
+      "rgb_sha256": "bc909c20a85cb300235c811630940ab084b5f98ab5efba77dd28945b2be122c1",
+      "gt_sha256": "c7524c713eee8f84655734f9697a48524e8f7b3e69bb8c2beac29becedf39c8f"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027299826984",
+      "rgb": "red_sea/sub_pier/imgs/16316027299826984.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027299826984_SeaErra_abs_depth.tif",
+      "rgb_sha256": "7c60c333580e6d18e633f012922228ad34f0c6653b9748a9303b6920a00274fb",
+      "gt_sha256": "a81025ce2e563cff27ce2c31102e5d5be5ff7d031a1e8253aa1e624baf8b776e"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027365905941",
+      "rgb": "red_sea/sub_pier/imgs/16316027365905941.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027365905941_SeaErra_abs_depth.tif",
+      "rgb_sha256": "476d522a2e5b19be11eb50b1809db5f0b93ce4a7514bf96624fc18ecf3f136e2",
+      "gt_sha256": "3b6335e750912dd64005b5b98897f4712ad96dc5ce1838f44b62d16950c8a2a5"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027422806282",
+      "rgb": "red_sea/sub_pier/imgs/16316027422806282.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027422806282_SeaErra_abs_depth.tif",
+      "rgb_sha256": "a28df1a64bb52951e2272b09e4b11a7988af0470d0d9ede9c8d0a7955106afc1",
+      "gt_sha256": "dbb967bd358090a39d1cc7bf01544b275cdd213f5e53810db02154a057c80db3"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027480717459",
+      "rgb": "red_sea/sub_pier/imgs/16316027480717459.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027480717459_SeaErra_abs_depth.tif",
+      "rgb_sha256": "25ac3fe9a53aed28987b34e2da2f55c8043149b6bf3ae72b5892287a8a6ffed2",
+      "gt_sha256": "77cc3bd5d0d1de4bf155404e754dde3c668dba8e199217126f264671851dbe0e"
+    },
+    {
+      "sequence": "red_sea/sub_pier",
+      "frame_id": "16316027537895732",
+      "rgb": "red_sea/sub_pier/imgs/16316027537895732.tiff",
+      "gt": "red_sea/sub_pier/depth/16316027537895732_SeaErra_abs_depth.tif",
+      "rgb_sha256": "722252fdf5b6d440a49d6e2296b64ade3dd03a0377612fa1c20c271820b1a3cb",
+      "gt_sha256": "998dc629198720bcc43ceed31c4dbe594a221f8744c09f53e09e13f8d07530f0"
+    }
+  ],
+  "signature": "09977a63eb560386f487a6156cde1c1d0a32424a1502f3c5747211da530e0bd5"
+}

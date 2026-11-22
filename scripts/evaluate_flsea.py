@@ -7,9 +7,10 @@ is the six FLSea sequences of arXiv:2507.02148 (120 frames); use ``--subset all`
 score all 12 sequences (240 frames).
 
 Rows per frame: ``ssi``/``median`` (per-image oracle, structure only), the ``constant``
-control, ``raw`` for depth-output models (default on), and ``global-ssi`` — a
-dataset-level scale + shift cross-fitted on the other half of the frames, the row
-comparable with papers that rescale predictions to dataset-specific depth units.
+control, ``raw`` for depth-output models (default on), ``rescaled`` — one
+dataset-level scale cross-fitted on the other half of the frames (the row closest
+to papers that rescale predictions to dataset-specific depth units) — and
+``global-ssi``, which adds a global shift on top of the scale.
 
 Examples:
     uv run --extra cu --extra flsea --extra depth-anything \\
@@ -97,6 +98,12 @@ def main() -> int:
         help="score depth-output models without alignment (default on; only meaningful for metric models)",
     )
     parser.add_argument(
+        "--rescaled",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="record the cross-fitted dataset-level 'rescaled' row (default on)",
+    )
+    parser.add_argument(
         "--global-ssi",
         action=argparse.BooleanOptionalAction,
         default=True,
@@ -117,7 +124,7 @@ def main() -> int:
         "--save-predictions",
         type=Path,
         metavar="DIR",
-        required=True,
+        default=None,
         help="save <frame_id>.png for each scored frame in DIR (uint16 depth x1000); "
         "depth models: raw metres, disparity models: oracle ssi-aligned metres; "
         "udepth also saves unaligned float32 relative-depth NPYs under relativas/",
@@ -138,6 +145,7 @@ def main() -> int:
         frames,
         min_valid_frac=args.min_valid_frac,
         include_raw=args.include_raw,
+        rescaled=args.rescaled,
         global_ssi=args.global_ssi,
         predictions_dir=(
             args.save_predictions / "alinhadas_ssi"

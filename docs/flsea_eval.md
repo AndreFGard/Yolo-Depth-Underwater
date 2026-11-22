@@ -28,8 +28,9 @@ uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model unidept
 ```
 Output: per-frame CSV in `results/` and a summary table (mean ± std over frames).
 Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
-`raw` and `global-ssi` rows are on by default; `--no-include-raw` / `--no-global-ssi`
-disable them (the latter also halves inference cost).
+`raw`, `rescaled` and `global-ssi` rows are on by default; `--no-include-raw` /
+`--no-rescaled` / `--no-global-ssi` disable them (disabling both dataset-level rows
+halves inference cost).
 
 With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-aligned depth in metres, since their raw output is not in metres. Skipped frames are not saved.
 
@@ -43,11 +44,14 @@ With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-al
   The per-image scale fit means these scores measure **structure only**: they cannot detect wrong absolute scale
   or frame-to-frame scale drift. `raw` (default on) scores depth-output models without alignment.
 * `constant` = best flat map; a model must beat it.
-* `global-ssi` (default on): one scale + shift fitted in disparity space on the even-indexed frames of the run and
-  applied to the odd-indexed ones, and vice versa — no frame contributes to its own fit. This mirrors the
-  dataset-level rescaling of arXiv:2507.02148 ("rescaled to match the dataset-specific depth units"), so it is the
-  row to place next to their Depth Anything V2 numbers, and the only metric-style row for disparity-output models.
-  Each scored frame is predicted twice while it is on.
+* `rescaled` (default on): one scale (no shift) fitted in disparity space on the even-indexed frames of the run and
+  applied to the odd-indexed ones, and vice versa — no frame contributes to its own fit. This is the scale-only
+  analogue of `global-ssi` and the closest proxy for the dataset-level rescaling of arXiv:2507.02148
+  ("rescaled to match the dataset-specific depth units").
+* `global-ssi` (default on): one scale + shift, cross-fitted the same way. The `rescaled` to `global-ssi` gap
+  isolates the global shift (large for relative-disparity models, near zero for metric ones). Together with
+  `rescaled`, these are the only metric-style rows for disparity-output models.
+  While either dataset-level row is on, each scored frame is predicted twice.
 * Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog (lambda = 0.85), on valid pixels.
 
 ## How the scores are aggregated (important when comparing papers)
@@ -75,10 +79,13 @@ The per-frame CSV in `results/` lets you reproduce the pooled numbers for the sa
 
 ## Oracle alignment
 
-Alignment uses the reference, so the aligned numbers are an upper bound for relative models and are **not
-comparable** with the arXiv:2507.02148 tables (those use no alignment; only the sequence choice is shared).
-For claims about physical meters, use `--include-raw` (possibly after calibrating on a separate split), not
-the aligned rows.
+Per-image alignment uses the reference of the scored frame, so the `ssi`/`median` numbers are an upper bound
+for relative models and are **not comparable** with the arXiv:2507.02148 tables (those use no alignment; only the
+sequence choice is shared). `rescaled`/`global-ssi` are instead fitted on the references of *other* frames
+(held-out calibration, not an oracle), but they are still transductive: they assume labelled data from the test
+distribution. For claims about physical meters, use `--include-raw` (possibly after calibrating on a separate
+split), not the aligned rows; for claims next to the paper's tables, use `raw` for metric models and `rescaled`
+(scale-only, closest proxy) for relative ones.
 
 ## Reference numbers (Depth Anything V2 Small, zero-shot, Colab T4)
 

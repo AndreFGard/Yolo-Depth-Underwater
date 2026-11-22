@@ -7,19 +7,20 @@ Protocol (identical for every model, so the numbers are comparable):
 * ``ssi``: per-image least-squares **scale + shift** in disparity space (MiDaS
   style), fitted on the valid reference pixels.
 * ``median``: per-image **scale only**, from the ratio of the medians.
-* ``global-ssi``: **one** scale + shift for the whole run, least-squares fitted on a
-  calibration half of the frames and applied to the other half (cross-fitted), so a
-  scored frame never contributes to its own fit.
+* ``rescaled``: **one** scale (no shift) for the whole run, least-squares fitted
+  in disparity space on a calibration half of the frames and applied to the other
+  half (cross-fitted), so a scored frame never contributes to its own fit.
+* ``global-ssi``: **one** scale + shift for the whole run, cross-fitted the same
+  way. The ``rescaled`` to ``global-ssi`` gap isolates the global shift.
 * After alignment the disparity is clipped to ``>= 1 / DEPTH_CAP_M`` and inverted
   back to meters, so the metrics are computed in depth space.
 * Metrics are computed on valid reference pixels only (finite and ``> 0``).
 
 The alignment uses the reference itself (an *oracle* alignment): it measures how
 well a model recovers the structure of the scene, not what it would score in the
-field without any reference. It is the same for all models. ``global-ssi`` is
-different: it is fitted on the references of *other* frames (a held-out calibration,
-not an oracle) and is the row comparable with literature that rescales predictions
-to dataset-specific depth units (e.g. arXiv:2507.02148).
+field without any reference. It is the same for all models. ``rescaled`` and
+``global-ssi`` use a cross fitm,a held-out calibration. ``rescaled`` is the scale-only analogue
+of the dataset-level rescaling in literature (eg. Cai Zijie), but global ssi ofc includes a shift
 """
 
 from __future__ import annotations
@@ -41,6 +42,9 @@ ALIGN_MODES = ("ssi", "median")
 
 GLOBAL_ALIGNMENT = "global-ssi"
 """Alignment name of the cross-fitted dataset-level scale + shift."""
+
+RESCALED_ALIGNMENT = "rescaled"
+"""Alignment name of the cross-fitted dataset-level scale-only fit."""
 
 
 def valid_mask(gt: np.ndarray) -> np.ndarray:
@@ -120,13 +124,58 @@ class GlobalFit:
                 return float(scale), float(shift)
         ratios = [g / p for p, g in self.med_pairs if p > 0.0]
         if not ratios:
-            raise ValueError("global alignment could not be fitted (no positive predictions)")
+            raise ValueError(
+                "global alignment could not be fitted (no positive predictions)"
+            )
         return float(np.median(ratios)), 0.0
 
 
-def apply_global_alignment(pred_disp: np.ndarray, scale: float, shift: float) -> np.ndarray:
+def apply_global_alignment(
+    pred_disp: np.ndarray, scale: float, shift: float
+) -> np.ndarray:
     """Apply a fitted global scale + shift in disparity space; return depth in meters."""
-    disp = np.clip(scale * np.asarray(pred_disp, dtype=np.float64) + shift, 1.0 / DEPTH_CAP_M, None)
+    disp = np.clip(
+        scale * np.asarray(pred_disp, dtype=np.float64) + shift, 1.0 / DEPTH_CAP_M, None
+    )
+    return 1.0 / disp
+
+
+@dataclass
+class RescaledFit:
+    """Least-squares accumulator for a dataset-level scale-only fit."""
+
+    n: int = 0
+    sxx: float = 0.0
+    sxy: float = 0.0
+    med_pairs: list[tuple[float, float]] = field(default_factory=list)
+
+    def add(self, pred_disp: np.ndarray, gt: np.ndarray, valid: np.ndarray) -> None:
+        p = np.asarray(pred_disp, dtype=np.float64)[valid]
+        g = 1.0 / gt[valid].astype(np.float64)
+        self.n += int(p.size)
+        self.sxx += float((p * p).sum())
+        self.sxy += float((p * g).sum())
+        self.med_pairs.append((float(np.median(p)), float(np.median(g))))
+
+    def solve(self) -> float:
+        if self.n < 2:
+            raise ValueError("need at least 2 valid reference pixels to align")
+        if self.sxx > 0.0:
+            scale = self.sxy / self.sxx
+            if math.isfinite(scale) and scale > 0.0:
+                return float(scale)
+        ratios = [g / p for p, g in self.med_pairs if p > 0.0]
+        if not ratios:
+            raise ValueError(
+                "rescaled alignment could not be fitted (no positive predictions)"
+            )
+        return float(np.median(ratios))
+
+
+def apply_rescaled_alignment(pred_disp: np.ndarray, scale: float) -> np.ndarray:
+    disp = np.clip(
+        scale * np.asarray(pred_disp, dtype=np.float64), 1.0 / DEPTH_CAP_M, None
+    )
     return 1.0 / disp
 
 

@@ -44,6 +44,10 @@ def _write_run_doc(run_dir: Path, args: argparse.Namespace) -> None:
         f"| Image size | {args.imgsz} |",
         f"| Batch size | {args.batch} |",
         f"| Device | `{args.device}` |",
+        f"| Learning rate | {args.lr0 if args.lr0 is not None else 'default'} |",
+        f"| Final LR fraction | {args.lrf if args.lrf is not None else 'default'} |",
+        f"| Optimizer | `{args.optimizer or 'default'}` |",
+        f"| Warmup bias LR | {args.warmup_bias_lr if args.warmup_bias_lr is not None else 'default'} |",
         f"| Save period | {args.save_period} epochs |",
         "",
         "Artifacts: `args.yaml`, `results.csv`, `weights/best.pt`, `weights/last.pt`.",
@@ -75,6 +79,14 @@ def main(argv: list[str] | None = None) -> int:
         type=int,
         default=DEFAULT_FREEZE,
         help="Freeze the first N top-level modules (default: 11 = whole backbone; 0 = none)",
+    )
+    parser.add_argument("--lr0", type=float, help="Initial learning rate")
+    parser.add_argument("--lrf", type=float, help="Final LR as a fraction of --lr0")
+    parser.add_argument(
+        "--optimizer", help="Optimizer; use with --lr0 (auto ignores --lr0)"
+    )
+    parser.add_argument(
+        "--warmup-bias-lr", type=float, help="Warmup bias learning rate"
     )
     parser.add_argument("--project", help="Directory for training runs")
     parser.add_argument("--name", help="Name of this run")
@@ -108,22 +120,36 @@ def main(argv: list[str] | None = None) -> int:
         elif existing_run:
             print(f"No checkpoint in {run_dir}; starting over in that run directory")
 
+    if resume and any(
+        getattr(args, key) is not None
+        for key in ("lr0", "lrf", "optimizer", "warmup_bias_lr")
+    ):
+        parser.error(
+            "LR and optimizer settings cannot be changed while resuming; "
+            "use a new --name to start another run"
+        )
+
     if model is None:
         model = YOLO(args.model)
-    model.train(
-        data=str(args.data),
-        epochs=args.epochs,
-        fraction=args.fraction,
-        imgsz=args.imgsz,
-        batch=args.batch,
-        device=args.device,
-        freeze=args.freeze,
-        save_period=args.save_period,
-        project=args.project,
-        name=args.name,
-        exist_ok=existing_run and not resume,
-        resume=resume,
-    )
+    train_kwargs = {
+        "data": str(args.data),
+        "epochs": args.epochs,
+        "fraction": args.fraction,
+        "imgsz": args.imgsz,
+        "batch": args.batch,
+        "device": args.device,
+        "freeze": args.freeze,
+        "save_period": args.save_period,
+        "project": args.project,
+        "name": args.name,
+        "exist_ok": existing_run and not resume,
+        "resume": resume,
+    }
+    for key in ("lr0", "lrf", "optimizer", "warmup_bias_lr"):
+        value = getattr(args, key)
+        if value is not None:
+            train_kwargs[key] = value
+    model.train(**train_kwargs)
     _write_run_doc(Path(model.trainer.save_dir), args)
     return 0
 

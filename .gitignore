@@ -18,3 +18,13 @@ report/slides.pdf
 .vscode/
 report/fonts
 3rd_party/
+results/
+udepth_assets/
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.kaggle/
+kaggle.json
+*.pth
+*.pt
+*.zip

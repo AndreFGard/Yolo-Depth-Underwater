@@ -1,0 +1,58 @@
+[
+  {
+    "model": "UDepth-RMI (pré-treinado)",
+    "same_frame_ids": true,
+    "same_valid_fraction": true,
+    "constant_max_abs_difference": {
+      "AbsRel": 0.0,
+      "RMSE": 0.0,
+      "d1": 0.0,
+      "d2": 0.0,
+      "d3": 0.0,
+      "SILog": 0.0
+    },
+    "source": "execução UDepth desta etapa"
+  },
+  {
+    "model": "YOLO26 baseline",
+    "same_frame_ids": true,
+    "same_valid_fraction": true,
+    "constant_max_abs_difference": {
+      "AbsRel": 0.0,
+      "RMSE": 0.0,
+      "d1": 0.0,
+      "d2": 0.0,
+      "d3": 0.0,
+      "SILog": 0.0
+    },
+    "source": "yolo_baseline_evaluation_flsea.csv"
+  },
+  {
+    "model": "YOLO26 unfrozen_80_unidepth",
+    "same_frame_ids": true,
+    "same_valid_fraction": true,
+    "constant_max_abs_difference": {
+      "AbsRel": 0.0,
+      "RMSE": 0.0,
+      "d1": 0.0,
+      "d2": 0.0,
+      "d3": 0.0,
+      "SILog": 0.0
+    },
+    "source": "yolo_unfrozen_80_unidepth_evaluation_flsea.csv"
+  },
+  {
+    "model": "UniDepth V2",
+    "same_frame_ids": true,
+    "same_valid_fraction": true,
+    "constant_max_abs_difference": {
+      "AbsRel": 0.0,
+      "RMSE": 0.0,
+      "d1": 0.0,
+      "d2": 0.0,
+      "d3": 0.0,
+      "SILog": 0.0
+    },
+    "source": "unidepth_evaluation_flsea.csv"
+  }
+]

@@ -44,6 +44,10 @@ DEFAULT_SUBSET = flsea.Subset.CAI_METZLER
 
 def build_model(name: str, variant: str | None, device: str | None) -> InferenceModel:
     """Models are imported lazily so each one only needs its own extra."""
+    if name == "udepth":
+        from yolo_depth_underwater.udepth_model import UDepthRMIModel
+
+        return UDepthRMIModel(device=device)
     if name == "depth-anything":
         from yolo_depth_underwater.depth_anything_model import DepthAnythingV2Model
 
@@ -65,7 +69,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument(
-        "--model", required=True, choices=["depth-anything", "yolo", "unidepth"]
+        "--model", required=True, choices=["depth-anything", "yolo", "unidepth", "udepth"]
     )
     parser.add_argument(
         "--variant", help="depth-anything: small|base|large; yolo: path/to/yolo.pt"
@@ -115,7 +119,8 @@ def main() -> int:
         metavar="DIR",
         required=True,
         help="save <frame_id>.png for each scored frame in DIR (uint16 depth x1000); "
-        "depth models: raw metres, disparity models: oracle ssi-aligned metres",
+        "depth models: raw metres, disparity models: oracle ssi-aligned metres; "
+        "udepth also saves unaligned float32 relative-depth NPYs under relativas/",
     )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -134,8 +139,17 @@ def main() -> int:
         min_valid_frac=args.min_valid_frac,
         include_raw=args.include_raw,
         global_ssi=args.global_ssi,
-        predictions_dir=args.save_predictions,
+        predictions_dir=(
+            args.save_predictions / "alinhadas_ssi"
+            if args.model == "udepth"
+            else args.save_predictions
+        ),
     )
+
+    if args.model == "udepth":
+        from yolo_depth_underwater.udepth_model import export_relative_predictions
+
+        export_relative_predictions(model, frames, rows, args.save_predictions)
 
     out = args.out or Path("results") / (
         f"flsea_{args.model}" + (f"_{args.variant}" if args.variant else "") + ".csv"
@@ -148,7 +162,7 @@ def main() -> int:
     )
     print(f"per-frame results: {out}")
     if args.save_predictions:
-        print(f"prediction PNGs: {args.save_predictions}")
+        print(f"prediction maps: {args.save_predictions}")
     return 0
 
 

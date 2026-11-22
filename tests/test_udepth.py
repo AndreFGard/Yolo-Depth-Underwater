@@ -119,8 +119,10 @@ def test_cli_separates_relative_npy_from_gt_aligned_png(
     assert cli.main() == 0
     with out.open() as stream:
         rows = list(csv.DictReader(stream))
-    assert len(rows) == 8
-    assert {r["alignment"] for r in rows} == {"ssi", "median", "constant", "global-ssi"}
+    assert len(rows) == 10
+    assert {r["alignment"] for r in rows} == {
+        "ssi", "median", "constant", "rescaled", "global-ssi"
+    }
     assert {r["frame_id"] for r in rows} == {"0", "1"}
     assert network.calls == 1
     assert len(list((predictions / "relativas").rglob("*.npy"))) == 2

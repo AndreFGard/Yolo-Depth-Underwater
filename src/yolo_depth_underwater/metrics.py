@@ -7,26 +7,21 @@ Protocol (identical for every model, so the numbers are comparable):
 * ``ssi``: per-image least-squares **scale + shift** in disparity space (MiDaS
   style), fitted on the valid reference pixels.
 * ``median``: per-image **scale only**, from the ratio of the medians.
-* ``rescaled``: **one** scale (no shift) for the whole run, least-squares fitted
-  in disparity space on a calibration half of the frames and applied to the other
-  half (cross-fitted), so a scored frame never contributes to its own fit.
-* ``global-ssi``: **one** scale + shift for the whole run, cross-fitted the same
-  way. The ``rescaled`` to ``global-ssi`` gap isolates the global shift.
+* ``raw`` (see :mod:`yolo_depth_underwater.evaluation`, depth-output models
+  only): no alignment at all, which is how metric models are scored in the
+  literature.
 * After alignment the disparity is clipped to ``>= 1 / DEPTH_CAP_M`` and inverted
   back to meters, so the metrics are computed in depth space.
 * Metrics are computed on valid reference pixels only (finite and ``> 0``).
 
-The alignment uses the reference itself (an *oracle* alignment): it measures how
-well a model recovers the structure of the scene, not what it would score in the
-field without any reference. It is the same for all models. ``rescaled`` and
-``global-ssi`` use a cross fitm,a held-out calibration. ``rescaled`` is the scale-only analogue
-of the dataset-level rescaling in literature (eg. Cai Zijie), but global ssi ofc includes a shift
+``ssi`` and ``median`` use the reference of the scored image (an *oracle* scale
+fit): they measure how well a model recovers the structure of the scene, not what
+it would score in the field with no reference. Because every model is fitted against
+the same reference, the alignment cancels in a per-frame difference between two
+models, so these rows stay comparable across models and checkpoints.
 """
 
 from __future__ import annotations
-
-import math
-from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -40,15 +35,11 @@ METRIC_NAMES = ("AbsRel", "RMSE", "d1", "d2", "d3", "SILog")
 
 ALIGN_MODES = ("ssi", "median")
 
-GLOBAL_ALIGNMENT = "global-ssi"
-"""Alignment name of the cross-fitted dataset-level scale + shift."""
-
-RESCALED_ALIGNMENT = "rescaled"
-"""Alignment name of the cross-fitted dataset-level scale-only fit."""
+SILOG_LAMBDA = 1.0
+"""Weight of the mean-log-error term in SILog (1.0 = purely scale invariant)."""
 
 
 def valid_mask(gt: np.ndarray) -> np.ndarray:
-    """Pixels of the reference that carry a depth value (finite and > 0)."""
     return np.isfinite(gt) & (gt > 0)
 
 
@@ -84,101 +75,6 @@ def align_to_depth(
     return 1.0 / disp
 
 
-@dataclass
-class GlobalFit:
-    """Least-squares accumulator for a dataset-level ``ssi`` fit.
-
-    ``add`` is called once per calibration frame; ``solve`` returns the pooled
-    ``(scale, shift)`` of ``gt_disp ~ scale * pred_disp + shift`` over all valid
-    pixels seen. A degenerate fit (e.g. constant predictions) falls back to the
-    median of the per-frame median ratios (scale only, shift 0).
-    """
-
-    n: int = 0
-    sx: float = 0.0
-    sy: float = 0.0
-    sxx: float = 0.0
-    sxy: float = 0.0
-    med_pairs: list[tuple[float, float]] = field(default_factory=list)
-
-    def add(self, pred_disp: np.ndarray, gt: np.ndarray, valid: np.ndarray) -> None:
-        """Accumulate the fit statistics of one frame's valid pixels."""
-        p = np.asarray(pred_disp, dtype=np.float64)[valid]
-        g = 1.0 / gt[valid].astype(np.float64)
-        self.n += int(p.size)
-        self.sx += float(p.sum())
-        self.sy += float(g.sum())
-        self.sxx += float((p * p).sum())
-        self.sxy += float((p * g).sum())
-        self.med_pairs.append((float(np.median(p)), float(np.median(g))))
-
-    def solve(self) -> tuple[float, float]:
-        """Return the pooled least-squares ``(scale, shift)`` in disparity space."""
-        if self.n < 2:
-            raise ValueError("need at least 2 valid reference pixels to align")
-        denom = self.n * self.sxx - self.sx**2
-        if denom > 0.0:
-            scale = (self.n * self.sxy - self.sx * self.sy) / denom
-            if math.isfinite(scale) and scale > 0.0:
-                shift = (self.sy - scale * self.sx) / self.n
-                return float(scale), float(shift)
-        ratios = [g / p for p, g in self.med_pairs if p > 0.0]
-        if not ratios:
-            raise ValueError(
-                "global alignment could not be fitted (no positive predictions)"
-            )
-        return float(np.median(ratios)), 0.0
-
-
-def apply_global_alignment(
-    pred_disp: np.ndarray, scale: float, shift: float
-) -> np.ndarray:
-    """Apply a fitted global scale + shift in disparity space; return depth in meters."""
-    disp = np.clip(
-        scale * np.asarray(pred_disp, dtype=np.float64) + shift, 1.0 / DEPTH_CAP_M, None
-    )
-    return 1.0 / disp
-
-
-@dataclass
-class RescaledFit:
-    """Least-squares accumulator for a dataset-level scale-only fit."""
-
-    n: int = 0
-    sxx: float = 0.0
-    sxy: float = 0.0
-    med_pairs: list[tuple[float, float]] = field(default_factory=list)
-
-    def add(self, pred_disp: np.ndarray, gt: np.ndarray, valid: np.ndarray) -> None:
-        p = np.asarray(pred_disp, dtype=np.float64)[valid]
-        g = 1.0 / gt[valid].astype(np.float64)
-        self.n += int(p.size)
-        self.sxx += float((p * p).sum())
-        self.sxy += float((p * g).sum())
-        self.med_pairs.append((float(np.median(p)), float(np.median(g))))
-
-    def solve(self) -> float:
-        if self.n < 2:
-            raise ValueError("need at least 2 valid reference pixels to align")
-        if self.sxx > 0.0:
-            scale = self.sxy / self.sxx
-            if math.isfinite(scale) and scale > 0.0:
-                return float(scale)
-        ratios = [g / p for p, g in self.med_pairs if p > 0.0]
-        if not ratios:
-            raise ValueError(
-                "rescaled alignment could not be fitted (no positive predictions)"
-            )
-        return float(np.median(ratios))
-
-
-def apply_rescaled_alignment(pred_disp: np.ndarray, scale: float) -> np.ndarray:
-    disp = np.clip(
-        scale * np.asarray(pred_disp, dtype=np.float64), 1.0 / DEPTH_CAP_M, None
-    )
-    return 1.0 / disp
-
-
 def depth_metrics(
     pred_depth: np.ndarray, gt: np.ndarray, valid: np.ndarray
 ) -> dict[str, float]:
@@ -187,7 +83,7 @@ def depth_metrics(
     g = gt[valid].astype(np.float64)
     ratio = np.maximum(g / p, p / g)
     log_err = np.log(p) - np.log(g)
-    silog = np.mean(log_err**2) - 0.85 * np.mean(log_err) ** 2
+    silog = np.mean(log_err**2) - SILOG_LAMBDA * np.mean(log_err) ** 2
     return {
         "AbsRel": float(np.mean(np.abs(g - p) / g)),
         "RMSE": float(np.sqrt(np.mean((g - p) ** 2))),
@@ -198,7 +94,7 @@ def depth_metrics(
     }
 
 
-def constant_baseline(gt: np.ndarray, valid: np.ndarray) -> np.ndarray:
+def control_baseline_depth(gt: np.ndarray, valid: np.ndarray) -> np.ndarray:
     """Best constant depth map (a control that has no scene structure).
 
     It uses the reference, like the alignment does. A model that does not beat it

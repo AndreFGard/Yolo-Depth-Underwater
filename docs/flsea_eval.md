@@ -28,9 +28,7 @@ uv run --extra cu --extra flsea python scripts/evaluate_flsea.py --model unidept
 ```
 Output: per-frame CSV in `results/` and a summary table (mean ± std over frames).
 Keep `--workers` at 2: Kaggle answers HTTP 429 when asked too fast.
-`raw`, `rescaled` and `global-ssi` rows are on by default; `--no-include-raw` /
-`--no-rescaled` / `--no-global-ssi` disable them (disabling both dataset-level rows
-halves inference cost).
+The `raw` row is on by default; `--no-include-raw` disables it.
 
 With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-aligned depth in metres, since their raw output is not in metres. Skipped frames are not saved.
 
@@ -43,16 +41,58 @@ With `--save-predictions DIR`, disparity-output models store the oracle `ssi`-al
   aligned disparity is clipped to >= 1/20 m and inverted. The same is applied to every model, metric ones included.
   The per-image scale fit means these scores measure **structure only**: they cannot detect wrong absolute scale
   or frame-to-frame scale drift. `raw` (default on) scores depth-output models without alignment.
-* `constant` = best flat map; a model must beat it.
-* `rescaled` (default on): one scale (no shift) fitted in disparity space on the even-indexed frames of the run and
-  applied to the odd-indexed ones, and vice versa — no frame contributes to its own fit. This is the scale-only
-  analogue of `global-ssi` and the closest proxy for the dataset-level rescaling of arXiv:2507.02148
-  ("rescaled to match the dataset-specific depth units").
-* `global-ssi` (default on): one scale + shift, cross-fitted the same way. The `rescaled` to `global-ssi` gap
-  isolates the global shift (large for relative-disparity models, near zero for metric ones). Together with
-  `rescaled`, these are the only metric-style rows for disparity-output models.
-  While either dataset-level row is on, each scored frame is predicted twice.
-* Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog (lambda = 0.85), on valid pixels.
+* `control` = best flat map (a flat-map baseline, not a calibration); a model must beat it.
+  CSVs written before 2026-11-22 label this row `constant` — same row, renamed.
+* Metrics: AbsRel, RMSE, delta1/2/3 (1.25^i), SILog with `metrics.SILOG_LAMBDA = 1.0`
+  (the variance form, `100 * std(log pred - log gt)`), on valid pixels.
+
+### SILog: why lambda must be 1.0 (changed 2026-11-22)
+
+With `g = log pred - log gt`, a prediction scaled by `s` shifts `g` by `c = log s`:
+
+```
+SILog^2(lambda) = mean(g^2) - lambda * mean(g)^2 = std(g)^2 + (1 - lambda) * mean(g)^2
+```
+
+So any `lambda != 1` retains a `(1 - lambda)` share of the mean log error, which is
+exactly the global scale error. At 0.85 a pure scale error of +-50% moves SILog by ~1.3
+points on a model whose spread is std = 0.15, and a perfectly calibrated model is
+unaffected — which is why the mistake is invisible. 1.0 is the evaluation convention in
+`ultralytics.utils.metrics` ("lambda=1 variance form (ZoeDepth/KITTI)") and in
+`3rd_party/unidepth` (`100 * std(log pred - log gt)`); 0.85 is AdaBins' `variance_focus`,
+a loss hyperparameter. SILog columns in CSVs written before 2026-11-22 use 0.85 and must
+not be compared with new ones.
+
+Every alignment row is a published protocol: `ssi` is the MiDaS scale-and-shift-invariant
+protocol for relative depth, `median` is per-image median scaling, `raw` is how metric models
+are scored. Nothing dataset-level is fitted.
+
+### Why there is no dataset-level fit (removed 2026-11-22)
+
+Earlier runs also recorded `rescaled` (one scale for the whole run) and `global-ssi` (one
+scale + shift), both cross-fitted on even/odd halves of the manifest. Both were dropped:
+
+* **The estimator is published only per capture.** A global `s·z + t` in inverse depth is
+  Wofk et al. (2020), used by SPADE (eqs. 1-4) and by Depth Anything 3 (eq. 8) — always
+  fitted for a *single* capture or pseudo-label batch, against measurements available at
+  inference. Pooling one fit over a 6-site benchmark's references is an unpublished estimand.
+  On our frames it is also mis-specified across sites: for UDepth it scores AbsRel 0.350, worse
+  than the flat-map control (0.323), and for Depth Anything V2 Large 0.289, worse than
+  per-image median scaling (0.144) by a factor of two.
+* **It confounds paired comparisons.** `ssi`/`median` are fitted against the scored frame's
+  own reference, so in a per-frame difference between two models the alignment cancels and
+  only the prediction changes. A dataset-level fit is re-derived per model, so a delta mixes
+  "the model changed" with "the fit changed".
+* **It cannot carry a claim on 119 frames.** Measured on `yolo_headneck_e16` vs the zero-shot
+  baseline, the paired delta on `ssi` has a bootstrap CI of width 0.017; on `global-ssi` the
+  width is 0.155 (~9x) and only 44% of frames move in the same direction, i.e. a coin flip,
+  because a single affine pooled over 119 frames is fitted on only ~60, and the two halves
+  disagree by ~15% of the metric.
+
+The consequence: the epoch-by-epoch claim (fine-tuning degrades FLSea transfer) rests on
+`ssi`/`median`, where every metric agrees, plus `raw` at the endpoints as the no-oracle
+check. Anyone reviving these rows should first re-read the two caveats above; the code was
+removed rather than disabled so it cannot be re-enabled by accident.
 
 ## How the scores are aggregated (important when comparing papers)
 
@@ -81,11 +121,8 @@ The per-frame CSV in `results/` lets you reproduce the pooled numbers for the sa
 
 Per-image alignment uses the reference of the scored frame, so the `ssi`/`median` numbers are an upper bound
 for relative models and are **not comparable** with the arXiv:2507.02148 tables (those use no alignment; only the
-sequence choice is shared). `rescaled`/`global-ssi` are instead fitted on the references of *other* frames
-(held-out calibration, not an oracle), but they are still transductive: they assume labelled data from the test
-distribution. For claims about physical meters, use `--include-raw` (possibly after calibrating on a separate
-split), not the aligned rows; for claims next to the paper's tables, use `raw` for metric models and `rescaled`
-(scale-only, closest proxy) for relative ones.
+sequence choice is shared). For claims about physical meters, use `raw` (with the checkpoint's calibration
+provenance stated), not the aligned rows; for structure claims and paired comparisons, use `ssi`/`median`.
 
 ## Reference numbers (Depth Anything V2 Small, zero-shot, Colab T4)
 
@@ -95,7 +132,7 @@ The `all` rows require `--subset all`; the default subset produces the `arxiv su
 |---|---|---|---|---|---|---|---|
 | all (238) | ssi | 0.0674 | 0.5654 | 0.9601 | 0.9912 | 0.9961 | 10.19 |
 | all (238) | median | 0.1495 | 1.1858 | 0.8481 | 0.9564 | 0.9820 | 18.33 |
-| all (238) | constant | 0.3127 | 1.5550 | 0.4151 | 0.7311 | 0.8866 | 42.44 |
+| all (238) | `constant` (old label of `control`) | 0.3127 | 1.5550 | 0.4151 | 0.7311 | 0.8866 | 42.44 |
 | arxiv subset (119) | ssi | 0.0656 | 0.6305 | 0.9647 | 0.9896 | 0.9948 | 10.34 |
 
 2 of 240 frames are discarded (too little reference). Reproduction should match up to GPU numerics.

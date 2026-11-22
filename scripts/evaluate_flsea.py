@@ -6,11 +6,10 @@ same alignment and metrics (see ``yolo_depth_underwater.metrics``). The default 
 is the six FLSea sequences of arXiv:2507.02148 (120 frames); use ``--subset all`` to
 score all 12 sequences (240 frames).
 
-Rows per frame: ``ssi``/``median`` (per-image oracle, structure only), the ``constant``
-control, ``raw`` for depth-output models (default on), ``rescaled`` — one
-dataset-level scale cross-fitted on the other half of the frames (the row closest
-to papers that rescale predictions to dataset-specific depth units) — and
-``global-ssi``, which adds a global shift on top of the scale.
+Rows per frame: ``ssi``/``median`` (per-image oracle, structure only — the MiDaS
+convention), the ``control`` row (flat map), and ``raw`` for depth-output models (no
+alignment, the metric-model convention; default on). Both modes and ``raw`` are
+published protocols; no dataset-level fit is applied. See docs/flsea_eval.md.
 
 Examples:
     uv run --extra cu --extra flsea --extra depth-anything \\
@@ -98,18 +97,6 @@ def main() -> int:
         help="score depth-output models without alignment (default on; only meaningful for metric models)",
     )
     parser.add_argument(
-        "--rescaled",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="record the cross-fitted dataset-level 'rescaled' row (default on)",
-    )
-    parser.add_argument(
-        "--global-ssi",
-        action=argparse.BooleanOptionalAction,
-        default=True,
-        help="record the cross-fitted dataset-level 'global-ssi' row (default on)",
-    )
-    parser.add_argument(
         "--workers",
         type=int,
         default=2,
@@ -145,8 +132,6 @@ def main() -> int:
         frames,
         min_valid_frac=args.min_valid_frac,
         include_raw=args.include_raw,
-        rescaled=args.rescaled,
-        global_ssi=args.global_ssi,
         predictions_dir=(
             args.save_predictions / "alinhadas_ssi"
             if args.model == "udepth" and args.save_predictions is not None

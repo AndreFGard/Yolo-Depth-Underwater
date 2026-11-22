@@ -11,7 +11,7 @@
       "d3": 0.0,
       "SILog": 0.0
     },
-    "source": "execução UDepth desta etapa"
+    "source": "Colab CPU, avaliador fa5f0c8, cinco alinhamentos"
   },
   {
     "model": "YOLO26 baseline",

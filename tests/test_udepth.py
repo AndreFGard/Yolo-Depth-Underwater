@@ -75,8 +75,9 @@ def test_relative_depth_is_unquantized_and_farther_is_larger():
     assert relative[0, 0] > relative[0, 1] > relative[0, 2] > 65.535
 
 
-def test_cli_separates_relative_npy_from_gt_aligned_png(
-    model_factory, monkeypatch, tmp_path
+@pytest.mark.parametrize("export_predictions", [False, True])
+def test_cli_supports_optional_export_and_separates_relative_from_aligned(
+    model_factory, monkeypatch, tmp_path, export_predictions
 ):
     create, network = model_factory
     model = create()
@@ -113,19 +114,18 @@ def test_cli_separates_relative_npy_from_gt_aligned_png(
             "cpu",
             "--out",
             str(out),
-            "--save-predictions",
-            str(predictions),
-        ],
+        ] + (["--save-predictions", str(predictions)] if export_predictions else []),
     )
     assert cli.main() == 0
     with out.open() as stream:
         rows = list(csv.DictReader(stream))
-    assert len(rows) == 10
-    assert {r["alignment"] for r in rows} == {
-        "ssi", "median", "constant", "rescaled", "global-ssi"
-    }
+    assert len(rows) == 6
+    assert {r["alignment"] for r in rows} == {"ssi", "median", "control"}
     assert {r["frame_id"] for r in rows} == {"0", "1"}
     assert network.calls == 1
+    if not export_predictions:
+        assert not predictions.exists()
+        return
     assert len(list((predictions / "relativas").rglob("*.npy"))) == 2
     relative = np.load(predictions / "relativas/canyons/flatiron/0.npy")
     np.testing.assert_array_equal(relative, 1 / inverse)
@@ -142,7 +142,7 @@ def test_cli_separates_relative_npy_from_gt_aligned_png(
     assert not (predictions / "relativas/canyons/flatiron/2.npy").exists()
 
 
-def test_results_match_group_frames_masks_and_constant_control():
+def test_results_match_legacy_group_frames_masks_and_unchanged_control_metrics():
     def read(path):
         with path.open() as stream:
             return list(csv.DictReader(stream))
@@ -155,29 +155,31 @@ def test_results_match_group_frames_masks_and_constant_control():
     )
     assert len(manifest) == 120
     assert len(expected) == 119
-    assert len(rows) == 595
+    assert len(rows) == 357
     excluded = json.loads(
         (ROOT / "artifacts/udepth_flsea_excluded_frames.json").read_text()
     )
     assert {(f.sequence, f.frame_id) for f in manifest} - expected == {
         key(r) for r in excluded
     }
-    alignments = {"ssi", "median", "constant", "rescaled", "global-ssi"}
+    alignments = {"ssi", "median", "control"}
     assert {r["alignment"] for r in rows} == alignments
     for alignment in alignments:
         part = [r for r in rows if r["alignment"] == alignment]
         assert len(part) == 119
         assert {key(r) for r in part} == expected
-    own = {key(r): r for r in rows if r["alignment"] == "constant"}
+    own = {key(r): r for r in rows if r["alignment"] == "control"}
     for name in ["yolo_baseline", "yolo_unfrozen_80_unidepth", "unidepth"]:
         peer = read(ROOT / f"artifacts/{name}_evaluation_flsea.csv")
         assert {key(r) for r in peer if r["alignment"] == "ssi"} == expected
-        for row in peer:
-            if row["alignment"] == "constant":
-                for field in ["valid_frac", *metrics.METRIC_NAMES]:
-                    assert float(row[field]) == pytest.approx(
-                        float(own[key(row)][field]), abs=2e-6
-                    )
+        control = [r for r in peer if r["alignment"] in {"constant", "control"}]
+        assert len(control) == 119
+        assert {key(r) for r in control} == expected
+        for row in control:
+            for field in ["valid_frac", "AbsRel", "RMSE", "d1", "d2", "d3"]:
+                assert float(row[field]) == pytest.approx(
+                    float(own[key(row)][field]), abs=2e-6
+                )
 
 
 def test_versioned_results_match_colab_validation_and_prediction_index():
@@ -192,8 +194,14 @@ def test_versioned_results_match_colab_validation_and_prediction_index():
     assert len({(r["sequence"], r["frame_id"]) for r in rows}) == validation["n_scored"]
     assert validation["dataset_version"] == 5
     assert validation["n_requested"] == 120
+    assert validation["silog_lambda"] == metrics.SILOG_LAMBDA == 1.0
+    assert validation["legacy_silog_comparable"] is False
+    assert "SILog" not in validation["control_metrics_compared_to_legacy"]
     assert validation["model_protocol"]["training"] is False
     assert validation["relative_maps_sha256_checked"] is True
+    assert validation["predictions_exported"] is True
+    assert validation["n_aligned_pngs"] == 119
+    assert len(validation["aligned_png_sha256"]) == 119
     for name, expected_hash in validation["source_sha256"].items():
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected_hash
     for alignment, summary in validation["summary"].items():
@@ -204,6 +212,7 @@ def test_versioned_results_match_colab_validation_and_prediction_index():
     with (ROOT / "artifacts/udepth_flsea_relative_index.csv").open() as stream:
         index = list(csv.DictReader(stream))
     assert len(index) == validation["n_relative_maps"] == 119
+    assert set(validation["aligned_png_sha256"]) == {r["frame_id"] for r in index}
     assert {(r["sequence"], r["frame_id"]) for r in index} == {
         (r["sequence"], r["frame_id"]) for r in rows
     }

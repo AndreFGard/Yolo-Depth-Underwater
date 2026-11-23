@@ -5,6 +5,7 @@
 #import "sections/experiments.typ": experiments
 #import "sections/related-work.typ": related-work
 #import "sections/results-and-discussions.typ": results-and-discussions
+#import "sections/eda.typ": eda
 
 #show bibliography: set std.bibliography(title: text(10pt)[References])
 
@@ -19,6 +20,7 @@
 
 #objectives
 #justificativa
+#eda
 #modelos
 #experiments
 #related-work

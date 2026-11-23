@@ -1,19 +1,4 @@
 #let experiments = [
-  = Modelo
-
-
-  //TODO adicionar referencia NYU v2
-  Considerando a sua eficiência computacional e ambiente de desenvolvimento e implantação maduros, o modelo escolhido foi o YOLO26@yolodepth, na variante variante nano, projetada para inferência em tempo real. Este modelo foi treinado em um conjunto variado de ~2,19M imagens provenientes de múltiplos datasets, todos terrestres, e alcança desempenho competente em conjuntos como o NYU V2 REF_NYU, apesar de possuir apenas 6,3M parâmetros.
-
-  //TODO detalhar um pouco mais a arquitetura dele e botar um diagrama da arquitetura.
-
-  Além dele, dois modelos de estado da arte de MDE terrestre atuam como professores, o UniDepth V2 @unidepthv2 e o Depth Anything V2 @depthanythingv2, que possuem altíssimo desempenho no FLSea mesmo uma avaliação _zeroshot_@synthetic_bench_zijie. Ademais, a disponibilidade dos pesos destes e a existência de um ecossistema ao redor deles são cruciais para a fácil reproducibilidade do seu uso. No entanto, ambos produzem resultados em formatos diferentes, profundidade métrica para o Unidepth, e disparidade relativa para o Depth Anything V2, o que representa um ponto de atenção durante a  comparação das suas métricas.
-
-  //TODO colocar sub-sub-seções detalhando um pouco cada um, particularmente o tipo de saída deles e arquitetura
-
-  //TODO usod10k reference
-  A título informativo, o UDepth@udepth,  considerando que este foi treinado nativamente no USOD10k REF_USOD10k e representa um modelo do domínio subaquático, também será usado como referência de desempenho.
-
   = Experimentos
   Nossos experimentos consistem em três finetunings baseados no YOLO26 em três conjuntos de dados com rótulos sintéticos diferentes, que são os já imbutidos no USOD10K, os produzidos pelo Unidepth e os produzidos pelo Depth Anything V2. Além disso, fazemos avaliações comparativas entre os mapas de profundidade e desempenho de todos os modelos envolvidos.
 
@@ -53,7 +38,9 @@
   //TODO lembrar de escrever sobre eles na base de dados.
   Fizemos um finetuning do YOLO26 para cada dataset de rótulos sintéticos obtidos do USOD10K e dos dois professores, usando o split do USOD10K entre treino, validação e teste, usando as imagens base inalteradas do USOD10K e os mapas de profundidade devidamente convertidos, conforme descrito em REF_BASE_DE_DADOS.
 
-  Utilizamos
+
+  //TODO adicionar footnote com os estudos limitados sobre Learning rate e não-congelamento de backbone.
+  Cada modelo foi treinado com imagens em resolução completa, 640x480, por 80 épocas, com o otimizador AdamW padrão, com taxa de aprendizado inicial 0.01 e decaimento linear, além do congelamento das 11 camadas do _backbone_ do modelo. Devido a restrições computacionais, não fizemos tunagem de parâmetros de treinamento.
 
   == Estudo comparativo das baselines em zero-shot
 

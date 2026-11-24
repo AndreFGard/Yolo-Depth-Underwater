@@ -37,9 +37,9 @@
   $ z_"rel" = frac(epsilon, d + epsilon), quad epsilon = 0.25. $
   O termo $epsilon$ evita a divisão por zero. Para $d$ entre 0 e 1, $z_"rel"$ varia de 1 a 0,2 na direção do ponto mais distante para o mais próximo. Gravamos o valor arredondado de $65535 z_"rel"$ como inteiro de 16 bits no PNG.
 
-  *USOD10K (DPT).* Os mapas originais já armazenam disparidade relativa normalizada por imagem @usod10k @ranftl2021dpt. O conversor divide cada valor de 16 bits por 65.535 para obter $d$ e aplica a inversão acima.#footnote[Implementação no #link("https://github.com/AndreFGard/Yolo-Depth-Underwater/blob/main/scripts/convert_usd10k_to_coco.py")[conversor do USOD10K].]
+  *USOD10K (DPT).* Os mapas originais já armazenam disparidade relativa normalizada por imagem @usod10k @ranftl2021dpt. O conversor divide cada valor de 16 bits por 65.535 para obter $d$ e aplica a inversão acima.
 
-  *Depth Anything V2 Small (ViT-S).* Para cada imagem, subtraímos o mínimo da disparidade predita e dividimos pela diferença entre o máximo e o mínimo, com piso de $10^(-9)$ no denominador. A mesma inversão gera pseudo-rótulos com a faixa de 13.107 a 65.535 usada nos PNGs convertidos do USOD10K. A geração com o Small foi registrada para as três divisões do dataset @depthanythingv2.#footnote[Código e execução no #link("https://github.com/AndreFGard/Yolo-Depth-Underwater/blob/main/notebooks/eda_usod10k_flsea.ipynb")[notebook de geração dos mapas].]
+  *Depth Anything V2 Small (ViT-S).* Para cada imagem, subtraímos o mínimo da disparidade predita e dividimos pela diferença entre o máximo e o mínimo, com piso de $10^(-9)$ no denominador. A mesma inversão gera pseudo-rótulos com a faixa de 13.107 a 65.535 usada nos PNGs convertidos do USOD10K. A geração com o Small foi registrada para as três divisões do dataset @depthanythingv2.
 
   *UniDepth V2 (ViT-L).* Usamos diretamente a saída de profundidade $z$ em metros @unidepthv2. Para gravar o PNG de 16 bits, multiplicamos $z$ por 1.000, arredondamos e limitamos os valores válidos à faixa de 1 a 65.535, com teto de 65,535 m. O valor zero representa pixels inválidos.
 
@@ -59,7 +59,7 @@
 
   *Alinhamento por imagem (_SSI_).* Para YOLO e UniDepth, obtemos a profundidade inversa $p = 1 / max(z, 0.01)$. Para Depth Anything V2 e UDepth-RMI, partimos da saída relativa em profundidade inversa. Em cada quadro, ajustamos a escala $s$ e o deslocamento $t$ por mínimos quadrados entre $s p + t$ e a referência inversa $1 / z_"ref"$, usando os pixels válidos. Limitamos a profundidade a 20 m ao aplicar um piso de $1/20$ à disparidade alinhada e inverter o resultado para obter
   $ z_"SSI" = frac(1, max(s p + t, 1 / 20)). $
-  As métricas SSI medem a estrutura recuperada após o ajuste à referência do próprio quadro. O avaliador também registra o alinhamento pela mediana, que usa a razão entre as medianas das profundidades inversas da referência e da predição como $s$, com $t = 0$.#footnote[Implementação em #link("https://github.com/AndreFGard/Yolo-Depth-Underwater/blob/main/src/yolo_depth_underwater/metrics.py")[metrics.py].]
+  As métricas SSI medem a estrutura recuperada após o ajuste à referência do próprio quadro. O avaliador também registra o alinhamento pela mediana, que usa a razão entre as medianas das profundidades inversas da referência e da predição como $s$, com $t = 0$.
 
   == Estudo comparativo das baselines em zero-shot
 

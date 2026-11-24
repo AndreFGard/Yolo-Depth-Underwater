@@ -11,6 +11,8 @@ dependencies = [
     "tqdm",
     "ultralytics>=8.4.175",
     "pandas",
+    "plotly",
+    "kaleido"
 ]
 
 [project.optional-dependencies]

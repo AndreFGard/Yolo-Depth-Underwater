@@ -1,2 +1,5 @@
-Model,AbsRel↓,RMSE↓,δ₁↑,SILog↓
-UniDepth V2 (ViT-L),0.0468,0.5385,0.9793,8.4369
+Model,raw AbsRel↓,raw δ₁↑,SSI AbsRel↓,SSI δ₁↑
+YOLO26n-Depth (zero-shot),0.27,0.39,0.11,0.90
+UniDepth V2 (ViT-L),0.10,0.92,0.05,0.98
+Depth Anything V2 (ViT-L),—,—,0.06,0.97
+UDepth-RMI,—,—,0.13,0.85

@@ -25,7 +25,7 @@
 
   == Comparação dos modelos no FLSea
 
-  Primeiro, comparamos o YOLO26n-Depth, sem ajuste, com seus professores e com o UDepth-RMI. As tabelas resumem a média aritmética das métricas nos 119 quadros válidos de seis sequências do subconjunto de @synthetic_bench_zijie.
+  Primeiro, comparamos o YOLO26n-Depth, sem ajuste, com seus professores e com o UDepth-RMI. A tabela resume a média aritmética das métricas nos 119 quadros válidos de seis sequências do subconjunto de @synthetic_bench_zijie.
 
   #let flsea-models = csv("../tables/models_on_flsea.csv")
   #figure(
@@ -34,6 +34,7 @@
       table(
         columns: (2.1fr, auto, auto, auto, auto),
         align: (left, center, center, center, center),
+        stroke: none,
         inset: (x: 5pt, y: 4pt),
         table.hline(stroke: 1pt),
         table.header(..flsea-models.first().map(c => strong(c))),
@@ -70,83 +71,94 @@
   Em seguida, comparamos o YOLO26n-Depth sem ajuste com os modelos ajustados. Para cada execução, usamos `best.pt`, selecionado pela validação do conjunto de treinamento, e avaliamos os mesmos 119 quadros do FLSea.
 
   #let finetuned-models = csv("../tables/finetuned_models_on_flsea.csv")
-  #place(
-    top + center,
-    float: true,
+  #figure(
+    placement: top,
     scope: "parent",
-    clearance: 1.2em,
-    figure(
-      {
-        set text(size: 8pt, hyphenate: false)
-        table(
-          columns: (1.4fr, 1fr, 1fr, 1fr, 1fr),
-          align: (left, center, center, center, center),
-          inset: (x: 5pt, y: 4pt),
-          table.hline(stroke: 1pt),
-          table.header(..finetuned-models.first().map(c => strong(c))),
-          table.hline(stroke: 0.5pt),
-          ..finetuned-models
-            .slice(1)
-            .map(row => {
-              let minimize = row.first().contains("AbsRel")
-              let best = best-number(row.slice(1), minimize)
-              row
-                .enumerate()
-                .map(pair => {
-                  let (j, cell) = pair
-                  if j == 0 {
-                    cell
-                  } else {
-                    emphasize-best(cell, best)
-                  }
-                })
-            })
-            .flatten(),
-          table.hline(stroke: 1pt),
-        )
-      },
-      caption: [Comparação do YOLO Baseline e dos modelos após finetune],
-    ),
+    {
+      set text(size: 8pt, hyphenate: false)
+      table(
+        columns: (1.4fr, 1fr, 1fr, 1fr, 1fr),
+        align: (left, center, center, center, center),
+        stroke: none,
+        inset: (x: 5pt, y: 4pt),
+        table.hline(stroke: 1pt),
+        table.header(..finetuned-models.first().map(c => strong(c))),
+        table.hline(stroke: 0.5pt),
+        ..finetuned-models
+          .slice(1)
+          .map(row => {
+            let minimize = row.first().contains("AbsRel")
+            let best = best-number(row.slice(1), minimize)
+            row
+              .enumerate()
+              .map(pair => {
+                let (j, cell) = pair
+                if j == 0 {
+                  cell
+                } else {
+                  emphasize-best(cell, best)
+                }
+              })
+          })
+          .flatten(),
+        table.hline(stroke: 1pt),
+      )
+    },
+    caption: [Comparação do YOLO Baseline e dos modelos após finetune],
   ) <tab:flsea-finetuned>
 
 
-  Observa-se que, em geral, nenhum dos modelos finetunados obteve resultados melhores que o baseline consistentemente. O YOLO-DA supera em apenas 0,01 o baseline no AbsRel quando com o alinhamento SSI e empata na $delta^1$, enquanto o YOLO-USOD fica próximo em AbsRel, mas tem $delta^1$ menor. Por outro lado, o YOLO-UniDepth apresenta a maior diferença para o baseline no $delta^1$ raw, subindo de 0,39 para 0,50, apesar de um aumento no erro absoluto relativo, indicando uma melhora na escala métrica das predições do modelo #footnote[Essa melhora é atribuída à qualidade da calibração feita com os mapas do UniDepth, não ao modelo em si. Nos casos do YOLO-DA e do YOLO-USOD a mesma calibração é debilitante, visto que os seus professores não produzem mapas em escala realista.]. Apesar disso, o YOLO-UniDepth apresentou uma perda considerável com o modo de alinhamento SSI, quando a escala é ajustada por uma transformação afim, mostrando que na verdade houve piora na estrutura das predições do modelo.
+  No conjunto, nenhum dos modelos ajustados supera o baseline de forma consistente. O melhor caso é quase um empate, em que o YOLO-DA ganha por 0,01 no AbsRel sob alinhamento SSI e empata na $delta^1$, enquanto o YOLO-USOD empata no AbsRel, mas perde na $delta^1$, ligeiramente. O caso mais instrutivo é o YOLO-UniDepth, que apresenta a maior diferença para o baseline no $delta^1$ _raw_, subindo de 0,39 para 0,50, enquanto o AbsRel piora, de 0,27 para 0,37, e sob SSI o modelo perde de forma clara com $0,84 delta^1$, indicando piora estrutural nos mapas. Essa melhora ficou restrita à escala métrica, que a calibração herdou do professor, e veio acompanhada de uma piora estrutural #footnote[Essa melhora é atribuída à qualidade da calibração feita com os mapas do UniDepth, não ao modelo em si. Nos casos do YOLO-DA e do YOLO-USOD a mesma calibração é debilitante, visto que os seus professores não produzem mapas em escala realista.].
 
-  //TODO botar uma ilustração sobre essa diferença do SSI e da median? com dado sintético ou só caçando mesmo uma imagem no FLSea que demonstre isso? Acho que só seria visível num dado sintético.
-  Usando o alinhamento por mediana, que corrige apenas a escala de cada imagem, ignorando menos distorções que a transformação afim obtida pelo SSI, os modelos finetunados ficam abaixo do baseline (0,81), incluindo o YOLO-DA (0,76) e o YOLO-UniDepth (0,73). Com essa comparação, podemos concluir que essa piora é relativa à forma da distribuição de profundidade, de maneira que o YOLO-DA melhora a geometria sob o alinhamento SSI mas distorce a distribuição sob o alinhamento por mediana no mesmo modelo, e essa piora é comum aos três professores.
+  O alinhamento por mediana também reforça as evidências acima. Como ele corrige apenas uma escala por imagem, enquanto o SSI ajusta uma transformação afim completa no espaço da disparidade, sobra nele todo erro que não seja de escala pura, e é esse o tipo de erro que se destaca no finetune, visto que os três modelos ficam abaixo do baseline de 0,81, com o YOLO-DA em 0,76 e o YOLO-UniDepth em 0,73. A leitura é que o finetune distorce a forma da distribuição de profundidade, um defeito que a transformação afim do SSI absorve em parte. A distorção é comum aos três professores, e a melhora marginal de geometria do YOLO-DA só aparece sob a régua mais permissiva.
 
 
 
   == Estudo do efeito do finetune ao longo do treinamento
   Considerando a avaliação supracitada dos modelos no FLSea, se mostrou importante analisar mais profundamente o efeito do finetuning neles, visando o entendimento do que levou o finetuning a ser, em última instância, infrutífero. De forma posterior ao treino, avaliamos no FLSea 25 pontos ao longo das 80 épocas de treino de cada finetune, ou seja, o modelo obtido após terminar cada época.
 
-  //TODO create a top level figure with displacement=none which makes these two appear side-by-side, taking up two columns.
 
+  Como a loss do finetune é invariante à escala, ela não ajusta pesos nesse sentido, a escala do modelo muda livremente ao longo do treinamento. Como os _checkpoints_ intermediários preservam a calibração original, o $delta^1$ _raw_ mediria principalmente esse deslocamento, e portanto não é produtivo para a análise, restando os alinhamentos SSI e por mediana.
 
-  Como a loss do finetune é invariante à escala, não ajustando pesos nesse sentido, a escala do modelo muda livremente ao longo do treinamento, e como os _checkpoints_ intermediários preservam a calibração original do modelo, o $delta^1$ _raw_ mediria o deslocamento dessa escala, e portanto não é produtivo para esta análise, restando os alinhamentos SSI e por mediana.
-
-  No entanto, há de se destacar que a calibração automaticamente aplicada pela biblioteca na última camada e no modelo escolhido, independente do aprendizado do modelo, corrigiria esse aspecto inteiramente, caso os mapas de profundidade em si estivessem na escala desejada, o que é falso no caso dos mapas do USOD10K e do Depth Anything. Conforme esperado com base no desempenho do Unidepth, a calibração baseada nos mapas dele, aplicada ao fim do treino e carregada pelos _checkpoints_ finais, melhorou significativamente essa métrica no YOLO-UniDepth#footnote[Verificamos que esse aumento se deve inteiramente à calibração, por meio da sua reversão.].. Associado às evidências supracitadas, isso indica que a escala métrica do UniDepth é de alta qualidade, conforme esperado considerando a avaliação deste, mas a transferência de conhecimento através do treinamento não foi positiva.
+  No entanto, há de se destacar que a calibração automaticamente aplicada pela biblioteca na última camada e no modelo escolhido, independente do aprendizado do modelo, corrigiria esse aspecto inteiramente, caso os mapas de profundidade em si estivessem na escala desejada, o que é falso no caso dos mapas do USOD10K e do Depth Anything. Conforme esperado com base no desempenho do UniDepth, a calibração baseada nos mapas dele, aplicada ao fim do treino e carregada pelos _checkpoints_ finais, melhorou significativamente essa métrica no YOLO-UniDepth#footnote[Verificamos que esse aumento se deve inteiramente à calibração, por meio da sua reversão.]. Somado às evidências acima, isso indica que a escala métrica do UniDepth é de alta qualidade, conforme esperado considerando a avaliação deste, mas a transferência do conhecimento dele através do treinamento não foi positiva.
 
   #figure(
-    image("../figures/D1_per_epoch_ssi.png"),
-    placement: none,
+    grid(
+      columns: (1fr, 1fr),
+      column-gutter: 8pt,
+      align(center)[
+        #image("../figures/D1_per_epoch_ssi.png", width: 100%) \
+        #text(size: 8pt)[$(a)$ $delta^1$ SSI por época, no FLSea.]
+      ],
+      align(center)[
+        #image("../figures/D1_per_epoch_val.png", width: 100%) \
+        #text(size: 8pt)[$(b)$ $delta^1$ de validação por época, alinhado por mediana.]
+      ],
+    ),
+    placement: top,
+    scope: "parent",
     caption: [
-      Qualidade estrutural no FLSea: $delta^1$ SSI por época.
+      Transferência e especialização ao longo do finetune no FLsea (SSI)
     ],
-  ) <fig:d1_ssi_per_epoch>
+  ) <fig:d1_per_epoch>
 
-  Em @fig:d1_ssi_per_epoch, o alinhamento SSI remove escala e deslocamento por imagem e representa a qualidade estrutural, permitindo uma comparação direta dos efeitos do finetuning. O YOLO-UniDepth sai de 0,90 para 0,75 na época 2, a maior queda entre eles e termina em 0,84, abaixo do baseline e dos outros modelos. O YOLO-USOD cai para 0,82 e se recupera até 0,88, e o YOLO-DA também cai para 0,82, mas se recupera até 0,90, empatando com o baseline.
+  No gráfico @fig:d1_per_epoch, o alinhamento SSI remove escala e deslocamento por imagem e representa a qualidade estrutural, permitindo uma comparação direta dos efeitos do finetuning. O YOLO-UniDepth sai de 0,90 para 0,75 na época 2, a maior queda entre eles, e termina em 0,84, abaixo do baseline e dos outros modelos. O YOLO-USOD cai para 0,82 e se recupera até 0,88, e o YOLO-DA também cai para 0,82, mas chega ao fim em 0,90, empatando com o baseline.
 
-  #figure(
-    image("../figures/D1_per_epoch_val.png"),
-    placement: none,
-    caption: [$delta^1$ alinhado por mediana, no conjunto de validação do treinamento, por época],
-  ) <fig:d1_per_epoch_val>
-  Apesar dos resultados negativos no FLSea, o $delta^1$ de validação (com os mapas de profundidade do respectivo modelo) durante o treino (@fig:d1_per_epoch_val), computado após o alinhamento por mediana de cada imagem e portanto imune à deriva de escala, sobe consideravelmente em todos os modelos #footnote[Apesar dos requisitos computacionais impedirem maiores comparações, estudos preliminares com taxas de aprendizagem menores indicaram que estas superam a taxa padrão apenas nas primeiras épocas, em que a instabilidade do aprendizado é mais acentuada].
+  Apesar dos resultados negativos no FLSea, o $delta^1$ de validação durante o treino, computado contra os rótulos do respectivo conjunto de treino, após o alinhamento por mediana de cada imagem e portanto imune à deriva da escala, sobe consideravelmente em todos os modelos #footnote[Apesar dos requisitos computacionais impedirem maiores comparações, estudos preliminares com taxas de aprendizagem menores indicaram que estas superam a taxa padrão apenas nas primeiras épocas, em que a instabilidade do aprendizado é mais acentuada].
 
-
-  A comparação entre professor e aluno reforça esse ponto. No FLSea o UniDepth V2 é o melhor professor ($delta^1$ SSI de 0,98) e gerou o pior aluno (0,84), enquanto o Depth Anything V2, ligeiramente pior como professor (0,97), gerou o melhor aluno (0,90). A ordem se inverte, o que indica que a qualidade do professor no domínio de avaliação não é o fator determinante.
 
   = Conclusões e discussões
+
+  A hipótese que motivou este trabalho, de que rótulos sintéticos produzidos por professores maiores bastariam para adaptar o YOLO26n-Depth ao domínio subaquático, não se confirmou. Nenhum dos três alunos supera o baseline de forma consistente (@tab:flsea-finetuned). O melhor deles, o YOLO-DA, apenas o iguala sob SSI ($delta^1$ de 0,90; AbsRel de 0,10 contra 0,11), e os três ficam abaixo dele sob alinhamento por mediana (0,76, 0,75 e 0,73 contra 0,81). Cada queda é pequena, mas ela aparece nos três modelos, e isso a torna o sinal mais consistente do experimento. Como é comum a professores muito diferentes, entendemos que sua origem esteja provavelmente associada a algo compartilhado pelas três execuções (o domínio do USOD10K, o tamanho do aluno ou a configuração de treino) do que em uma propriedade de cada professor.
+
+  O único ganho expressivo, o $delta^1$ _raw_ do YOLO-UniDepth (de 0,39 para 0,50), não pode ser entendido como aprendizado. Ele desaparece ao revertermos a calibração incorporada ao _checkpoint_, e no mesmo modelo o AbsRel _raw_ piora (de 0,27 para 0,37) e a qualidade estrutural cai (SSI de 0,90 para 0,84). A calibração feita com os mapas métricos do UniDepth corrigiu a escala do YOLO, o que é coerente com a qualidade do professor, mas o treinamento em si não transferiu estrutura. Para recuperar escala métrica, portanto, a calibração sozinha já cumpriu o papel que o ajuste fino deveria cumprir, a um custo muito menor.
+
+  O $delta^1$ de validação sobe de forma contínua nos três modelos (@fig:d1_per_epoch), mas esse número mede a concordância com os rótulos do próprio conjunto de treino e não é comparável entre alunos, já que cada um é medido contra rótulos diferentes, e mostra apenas a adaptação a eles. Essas evidências indicam que o ajuste fino especializa o modelo no USOD10K, cuja razão R/G é de cerca de 0,7, enquanto no FLSea ela fica entre 0,30 e 0,40. O que se aprende nesse domínio não é transferido, e ainda desloca o modelo da solução em que o pré-treino o havia colocado. A queda nas primeiras épocas (de 0,90 para algo entre 0,75 e 0,82 sob SSI), mesmo com o backbone congelado, indica que as primeiras atualizações de pescoço e cabeça já bastam para afastá-lo dessa solução, e a recuperação posterior é incompleta em dois dos três casos. Em testes preliminares, reduzir a taxa de aprendizagem atenuou essa queda inicial, mas não afetou o resultado final.
+
+  O resultado mais interessante é que o UniDepth, o melhor professor, gerou o pior aluno, o que ocorre apesar de, em _zero-shot_ sob SSI, UniDepth e Depth Anything estarem quase empatados. Se a qualidade estrutural dos professores é quase a mesma, a diferença entre os alunos não pode vir dela. Por isso, uma hipótese é a relação com o formato dos rótulos, que são métricos no caso do  UniDepth, enquanto os do Depth Anything e do USOD10K são normalizados por imagem, e a perda é invariante a um fator de escala comum ao lote, mas não a erros de escala que variem de imagem para imagem. O fato de o YOLO-USOD, treinado com um professor muito menos capaz, superar o YOLO-UniDepth é coerente com essa hipótese. Ainda assim, esse permanece um caminho para ser explorado e testado futuramente.
+
+  == Limitações e trabalhos futuros
+
+  Apesar da identificação da inefetividade do finetuning, não foi possível isolar experimentalmente mais váriaveis relacionadas ao treinamento para elucidar as questões remanescentes. Particularmente, não foi possível testar hiperparâmetros de treino e nem estudos quanto ao tamanho do dataset USOD10K, que é por muitas vezes menor que os utilizados em outros trabalhos @synthetic_bench_zijie@maudepth, além da indisponibilidade de rótulos _ground truth_ para ele que embasassem mais comparações entre o treinamento dos modelos. Ademais, adaptações da estrutura do modelo ao domínio também demandariam mais recursos e dados, mas representam um caminho promissor e bastante abordado na literatura @udepth@maudepth@watermono. 
 
 ]

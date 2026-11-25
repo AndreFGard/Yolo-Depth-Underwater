@@ -1,15 +1,19 @@
 // Seção "Análise Exploratória dos Dados". Tabelas em ../tables/*.csv (separador ";"),
 // figuras em ../figures/eda/*.png (geradas pelo notebook notebooks/eda_usod10k_flsea.ipynb).
 
-#let csv-table(path, columns, aligns) = {
+#let csv-table(path, columns, aligns, bordered: false) = {
   let rows = csv(path, delimiter: ";")
   set text(size: 7pt)
   table(
     columns: columns,
     align: aligns,
-    stroke: (x, y) => if y == 0 { (bottom: 0.6pt) } else { none },
+    stroke: if bordered { none } else { (x, y) => if y == 0 { (bottom: 0.6pt) } else { none } },
+    ..(if bordered { (inset: (x: 5pt, y: 4pt)) } else { (:) }),
+    if bordered { table.hline(stroke: 1pt) },
     table.header(..rows.first().map(c => strong(c))),
+    if bordered { table.hline(stroke: 0.5pt) },
     ..rows.slice(1).flatten(),
+    if bordered { table.hline(stroke: 1pt) },
   )
 }
 
@@ -115,7 +119,7 @@
   ) <fig:flsea>
 
   #figure(
-    csv-table("../tables/eda_flsea_sequences.csv", (2.4fr,) + (1fr,) * 6, (left,) + (center,) * 6),
+    csv-table("../tables/eda_flsea_sequences.csv", (2.4fr,) + (1fr,) * 6, (left,) + (center,) * 6, bordered: true),
     placement: top,
     scope: "parent",
     caption: [Estatísticas por sequência do FLSea. "Válido" = fração de pixels com referência; mediana, p95 e máximo da profundidade em metros.],

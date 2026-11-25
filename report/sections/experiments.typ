@@ -4,70 +4,80 @@
 
   == Métricas
 
-  Adotamos principalmente o conjunto de métricas consolidado por @eigen, que permanece uma referência @maudepth@synthetic_bench_zijie e permite a comparação com trabalhos relacionados. Assim, reportaremos as métricas AbsRel, RMSE, $delta^1$ e Silog.
+  Adotamos principalmente o conjunto de métricas consolidado por @eigen, que permanece uma referência @maudepth@synthetic_bench_zijie e permite a comparação com trabalhos relacionados. Assim, reportaremos as métricas AbsRel, RMSE, $delta^1$ e Silog. Em todas as métricas, $z_i$ é a referência, $hat(z)_i$ a predição e $N$ o número de pixels válidos do quadro.
 
-  Conforme elaborado em @eigen, a escala, que é fundamentalmente ambígua nas cenas, é sozinha responsavél por uma grande parcela do erro das métricas, fazendo-se necessário o uso de métricas específicas para avaliar a qualidade estrutural dos mapas de profundidade, disassociada da escala.
+  Conforme elaborado em @eigen, a escala, que é fundamentalmente ambígua nas cenas, é sozinha responsável por uma grande parcela do erro das métricas, o que pede também métricas que meçam a qualidade estrutural dos mapas, dissociada da escala.
 
-
-  //TODO setas pra cima e pra baixo
   === AbsRel
   A diferença absoluta relativa (*AbsRel*) quantifica o erro em razão da magnitude do ground truth, evitando que erros pequenos comparados à profundidade de um ponto distorçam a métrica @eigen.
-  //TODO Formula
+
+  $ "AbsRel" = frac(1, N) sum_i frac(|hat(z)_i - z_i|, z_i) $
 
   === RMSE
-  A *RMSE* quantifica o erro na unidade de profundidade, o que a faz ser de interpretação complexa no contexto do estudo e a ser dominada por erros em profundidades maiores, independente da qualidade da predição fina em objetos mais próximos.
+  A *RMSE* quantifica o erro na unidade de profundidade, o que a faz de interpretação complexa no contexto do estudo e a ser dominada por erros em profundidades maiores, independente da qualidade da predição fina em objetos mais próximos.
 
-  //TODO Formula
+  $ "RMSE" = sqrt(frac(1, N) sum_i (hat(z)_i - z_i)^2) $
+
   === $delta^1$
-  _*Threshold accuracy*_ (*$delta^1$*) é uma das métricas mais amplamente utilizadas no campo @eigen @synthetic_bench_zijie e mede a porcentagem de pontos que distam do ground truth dentro de uma tolerância.
-  //TODO Formula
+  _*Threshold accuracy*_ (*$delta^1$*) é uma das métricas mais amplamente utilizadas no campo @eigen @synthetic_bench_zijie e mede a porcentagem de pontos que distam do ground truth dentro de uma tolerância: a porcentagem de pixels que satisfazem $max(z_i, hat(z)_i) < 1.25 min(z_i, hat(z)_i)$.
 
   === Silog
-  A *Silog* ou _scale-invariant mean squared error_, é derivada da RMSE, mas atua no espaço logarítimico e de forma invariante a escala, capturando a qualidade estrutural do mapa de profundidade, em que o escalar $alpha(y, ŷ)$ é a escala que melhor alinha o mapa predito ao ground truth.
-  //TODO formula do eigen.
+  A *Silog* é a RMSE trasladada para o espaço logarítmico e corrigida da escala. Com $g_i = ln hat(z)_i - ln z_i$ e $m$ a média dos resíduos,
 
-  == Finetune do YOLO com rótulos sintéticos
-  Ajustamos o YOLO26n-Depth com as imagens RGB e as divisões de treino, validação e teste do USOD10K. Em cada conjunto de treino, usamos um mapa de profundidade por imagem, produzido a partir dos rótulos originais do USOD10K ou das predições de um dos dois professores.
+  $ "SILog" = 100 sqrt(frac(1, N) sum_i (g_i - m)^2). $
 
-  Devido a restrições computacionais, não fizemos uma busca ampla de hiperparâmetros. Os ajustes duraram 80 épocas, usaram AdamW com decaimento linear e mantiveram congelados os 11 primeiros módulos do modelo. A taxa de aprendizado inicial variou entre as execuções: 0,01 para USOD10K e para um dos ajustes com Depth Anything V2; 0,002 para UniDepth; e 0,0005 para a repetição com Depth Anything V2.
+  Subtrair $m$ equivale, na forma original de @eigen, a multiplicar a predição pela escala $alpha = exp(-m)$ que melhor a alinha à referência. Um erro global de escala desloca todos os $g_i$ igualmente e some da variância: o que sobra mede a qualidade estrutural do mapa. É a mesma Silog que treina o YOLO (seção de modelos), aqui no papel de métrica.
 
-  === Escala e conversão dos mapas de treino
+  == Ajuste fino do YOLO com rótulos sintéticos
 
-  A disparidade relativa tem valores maiores nos pontos mais próximos. Para obter mapas em que valores maiores indicam pontos mais distantes, convertemos a disparidade normalizada $d$ em profundidade relativa $z_"rel"$ pela relação
-  $ z_"rel" = frac(epsilon, d + epsilon), quad epsilon = 0.25. $
-  O termo $epsilon$ evita a divisão por zero. Para $d$ entre 0 e 1, $z_"rel"$ varia de 1 a 0,2 na direção do ponto mais distante para o mais próximo. Gravamos o valor arredondado de $65535 z_"rel"$ como inteiro de 16 bits no PNG.
+  Fizemos três _finetunes_ do YOLO26n-Depth com as imagens do USOD10K e o mesmo split original do dele, com 7.178 imagens de treino, 2.051 de validação e 1.026 de teste. Fizemos dois datasets com as imagens do USOD10K, mas com os mapas de profundidade produzidos por um modelo professor cada, o Depth Anything V2 (ViT-L)@depthanythingv2 e o Unidepth V2@unidepthv2, com o terceiro finetuning sendo feito inteiramente com o USOD10K original. Assim, referimo-nos a esses modelos como YOLO-DA, YOLO-Unidepth e YOLO-USOD, respectivamente.
 
-  *USOD10K (DPT).* Os mapas originais já armazenam disparidade relativa normalizada por imagem @usod10k @ranftl2021dpt. O conversor divide cada valor de 16 bits por 65.535 para obter $d$ e aplica a inversão acima.
+  Só os mapas mudaram entre as execuções, e todos foram convertidos para profundidade relativa, para possibilitar o treinamento. Devido a restrições computacionais, não fizemos uma tunagem de hiperparâmetros, respeitando os padrões estabelecidos pela biblioteca dos desenvolvedored do YOLO. Foram usadas 80 épocas, imagens em 640 px, _mini-batch_ de 16, backbone congelado (os 11 primeiros módulos@yolodepth), warmup de 3 épocas e decaimento linear. Também usamos o AdamW, com taxa de aprendizagem inicial de 0,002, o padrão.
 
-  *Depth Anything V2 Small (ViT-S).* Para cada imagem, subtraímos o mínimo da disparidade predita e dividimos pela diferença entre o máximo e o mínimo, com piso de $10^(-9)$ no denominador. A mesma inversão gera pseudo-rótulos com a faixa de 13.107 a 65.535 usada nos PNGs convertidos do USOD10K. A geração com o Small foi registrada para as três divisões do dataset @depthanythingv2.
+  === Rótulos e conversões
+  Para adequar os mapas de profundidade à profundidade relativa ou métrica exigida pela modelagem do YOLO, foi necessário adotar um método de conversão para os modelos que não produziam mapas nativamente neste formato.
 
-  *UniDepth V2 (ViT-L).* Usamos diretamente a saída de profundidade $z$ em metros @unidepthv2. Para gravar o PNG de 16 bits, multiplicamos $z$ por 1.000, arredondamos e limitamos os valores válidos à faixa de 1 a 65.535, com teto de 65,535 m. O valor zero representa pixels inválidos.
+  *USOD10K (DPT)*: Os mapas que acompanham o USOD10K são estimativas de um DPT, armazenadas como disparidade relativa normalizada por imagem, com valores maiores significando pontos mais próximos @usod10k @ranftl2021dpt (detalhes na análise exploratória, @sec:eda). Para obter a profundidade relativa, aplicamos a relação:
 
-  O carregador divide os valores dos PNGs por 1.000, definido como `depth_scale` no YAML. Essa divisão recupera os metros com a quantização do PNG para os rótulos do UniDepth. Para USOD10K e Depth Anything V2, os valores carregados continuam em unidades relativas a cada imagem.
+  $ z = frac(epsilon, d + epsilon), quad epsilon = 0.25, $
+
+  O termo $epsilon$ evita a divisão por zero. Para $d$ entre 0 e 1, temos que $z in [1.0, 0.2]$, na direção do ponto mais distante para o mais próximo.
+
+
+  *Depth Anything V2 Large (ViT-L)*: Os mapas de  são disparidade não normalizada, então os normalizamos e os convertemos para profundidade relativa @depthanythingv2.
+
+  *UniDepth V2 (ViT-L).* Usamos diretamente a saída métrica em metros @unidepthv2, gravada em milímetros.
+
+  Como a perda de treino é invariante a um fator global de escala (seção de modelos), a escala escolhida para cada conjunto não afeta o aprendizado dos modelos, apenas a geometria e estrutura da profundidade.
 
   === Calibração dos checkpoints do YOLO
 
-  A cabeça do YOLO aplica à profundidade $z$ a calibração do checkpoint, $z_"cal" = exp(a log(z) + b)$, com os coeficientes globais `cal_a` e `cal_b` @yolodepth. Nos checkpoints `best.pt` registrados no estudo por época, $a = 1$, de modo que a calibração multiplica o mapa por $exp(b)$.
+  A cabeça do YOLO aplica, apenas em avaliação, a calibração do checkpoint, $z_"cal" = exp(a ln z + b)$, com os coeficientes globais `cal_a` e `cal_b` (seção de modelos). Nos checkpoints deste estudo $a = 1$, de modo que a calibração se reduz a multiplicar o mapa por $exp(b)$.
 
-  Para cada ajuste fino, usamos o `best.pt` selecionado pela validação do respectivo conjunto de treino. Os rótulos dessa mesma validação servem para escolher a calibração. O YOLO-UniDepth é calibrado com rótulos em metros. O YOLO-DA e o YOLO-USOD são calibrados com rótulos relativos. O FLSea é reservado à avaliação externa.
+  Para cada ajuste fino, usamos o melhor modelo selecionado pela validação do respectivo conjunto de validação. Os rótulos dessa mesma validação servem para escolher a calibração, feita automaticamente pela biblioteca do YOLO e incorporada ao modelo, o que faz sentido no caso do Unidepth, mas, devido à natureza dos rótulos, não deve ser considerado no caso dos outros dois datasets.
+
 
   == Protocolo de avaliação
 
-  A referência do FLSea é dada em metros @flsea. Redimensionamos a predição para a grade da referência com interpolação bilinear quando necessário. Calculamos as métricas nos pixels com referência finita e positiva.
+  Devido à ambiguidade intrínseca da escala da profundidade e à variedade de modelos utilizados, optamos por um sistema de avaliação flexível, em que cada predição passa por três alinhamentos alternativos, e as métricas são calculadas sobre cada uma. No caso do _raw_, apenas os modelos de profundidade métrica são considerados, incluindo o YOLO Baseline e o YOLO-Unidepth, com a sua calibração predefinida obtida durante o seu treinamento original.
 
-  *Sem alinhamento (_raw_).* Avaliamos a profundidade fornecida pelo modelo, limitada à faixa de 0,01 a 20 m, sem ajustar a escala ao quadro do FLSea. Nas tabelas comparativas, reportamos _raw_ para o UniDepth V2, o YOLO26n-Depth pré-treinado e o YOLO-UniDepth, que fornecem profundidade em escala métrica.
+  A avaliação externa usa o FLSea-VI, conforme explicado. Avaliamos as 6 sequências usadas por @synthetic_bench_zijie, resultando em 120 quadros. Dessa maneira, todos os modelos são avaliados no FLSea de forma _zero-shot_, enquanto os efeitos do finetuning do YOLO com os rótulos sintéticos podem ser avaliados com dados reais e de alta qualidade quanto ao ganho de capacidade fora do seu domínio de treino.
 
-  *Alinhamento por imagem (_SSI_).* Para YOLO e UniDepth, obtemos a profundidade inversa $p = 1 / max(z, 0.01)$. Para Depth Anything V2 e UDepth-RMI, partimos da saída relativa em profundidade inversa. Em cada quadro, ajustamos a escala $s$ e o deslocamento $t$ por mínimos quadrados entre $s p + t$ e a referência inversa $1 / z_"ref"$, usando os pixels válidos. Limitamos a profundidade a 20 m ao aplicar um piso de $1/20$ à disparidade alinhada e inverter o resultado para obter
-  $ z_"SSI" = frac(1, max(s p + t, 1 / 20)). $
-  As métricas SSI medem a estrutura recuperada após o ajuste à referência do próprio quadro. O avaliador também registra o alinhamento pela mediana, que usa a razão entre as medianas das profundidades inversas da referência e da predição como $s$, com $t = 0$.
+  - *Sem alinhamento (`raw`).* A profundidade do modelo é usada diretamente, limitada ao intervalo de 0,01 a 20 m, seguindo o padrão da Ultralytics. Aplica-se apenas a modelos que produzem profundidade métrica e é a linha mais facilmente comparável com a literatura.
+
+  - *Alinhamento por imagem (`ssi`)*: Em cada quadro ajustamos a escala $s$ e o deslocamento $t$ por mínimos quadrados entre $s p + t$ e a referência inversa $1/z_"ref"$, nos pixels válidos @midas, e limitamos a profundidade a 20 m ao inverter:
+    $ z_"SSI" = frac(1, max(s p + t, 1/20)). $
+
+  - *Alinhamento por mediana (`median`)*: Só é ajustada a escala, pela razão entre as medianas da referência e da predição. Os dois alinhamentos por imagem são oráculos que usam a referência do próprio quadro, então medem a estrutura, apenas. Diferem, porém, no escopo de defeitos que podem ser detectados, pois a transformação afim do SSI de fato pode se ajustar a erros que vão além da premissa de robustez à escala.
+
+  Assim, pesar de as métricas permitirem comparações em algum grau entre modelos com premissas diferentes, os alinhamentos têm requisitos de oráculo distintos, e nossas conclusões têm escopo adequado a essas condições. Reportamos a média aritmética das métricas por quadro.
 
   == Estudo comparativo das baselines em zero-shot
 
-  Comparamos o YOLO26n-Depth pré-treinado, o UniDepth V2 (ViT-L), o Depth Anything V2 Large (ViT-L) e o UDepth-RMI nos mesmos quadros do FLSea. A disparidade predita pelo Large entra diretamente no alinhamento SSI.
+  Com esse protocolo, avaliamos quatro modelos sem nenhum treino ou ajuste no FLSea, com seus pesos oficiais: o UniDepth V2 (ViT-L), o Depth Anything V2 Large (ViT-L) usados em @synthetic_bench_zijie, o YOLO26n-Depth baseline e o UDepth-RMI.
 
-  No protocolo do UDepth-RMI @udepth, tratamos a saída $u$, redimensionada por interpolação bilinear, como profundidade inversa relativa. Aplicamos o piso $p = max(u, 10^(-6))$ antes do SSI. Para exportar o mapa relativo, gravamos $1 / p$ em NPY de 32 bits em ponto flutuante, sem normalização por imagem. A exportação de avaliação em PNG para UDepth-RMI e Depth Anything V2 usa o mapa obtido por SSI, que está em metros por ter sido alinhado à referência do FLSea.
+  == Estudo do efeito do ajuste fino época a época
 
-  == Estudo do efeito do finetuning época a época
-
+  Para entender o efeito do finetune ao longo do treinamento, fazemos, posteriormente ao seu treino, avaliações dos seus passos intermediários. Os pesos são salvos a cada duas épocas, e pontuamos no FLSea 25 destes pontos, aproximadamente a cada duas épocas, e comparamos cada ponto com o baseline. A leitura principal usa o SSI e a mediana, que removem a escala. Incluímos no mesmo estudo a $delta^1$ de validação registrada durante o treino, que mostra a especialização ao domínio de treinamento.
 
 ]

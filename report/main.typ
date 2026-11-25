@@ -10,10 +10,7 @@
 #show bibliography: set std.bibliography(title: text(10pt)[References])
 
 #show: ieee.with(
-  title: [Yolo26 Underwater: YOLOv26-based Object Detection for Underwater Scenarios],
-  abstract: [
-    Abstrac.s
-  ],
+  title: [Finetuning do YOLO-Depth para Estimação Monocular de Profundidade Submarina],
   authors: yaml("authors.yml"),
   bibliography: bibliography("refs.bib", full: true),
 )

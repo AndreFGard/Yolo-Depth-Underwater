@@ -85,6 +85,6 @@
   Apesar dos resultados negativos no FLSea, o $delta^1$ de validação (com os mapas de profundidade do respectivo modelo) durante o treino (@fig:d1_per_epoch_val), computado após o alinhamento por mediana de cada imagem e portanto imune à deriva de escala, sobe consideravelmente em todos os modelos #footnote[Apesar dos requisitos computacionais impedirem maiores comparações, estudos preliminares com taxas de aprendizagem menores indicaram que estas superam a taxa padrão apenas nas primeiras épocas, em que a instabilidade do aprendizado é mais acentuada].
 
 
-  A comparação entre professor e aluno reforça esse ponto. No FLSea o UniDepth V2 é o melhor professor ($delta^1$ SSI de 0,98) e gerou o pior aluno (0,84), enquanto o Depth Anything V2, ligeiramente pior como professor (0,97), gerou o melhor aluno (0,91). A ordem se inverte, o que indica que a qualidade do professor no domínio de avaliação não é o fator determinante; o que o aluno consegue reproduzir a partir da imagem é.
+  A comparação entre professor e aluno reforça esse ponto. No FLSea o UniDepth V2 é o melhor professor ($delta^1$ SSI de 0,98) e gerou o pior aluno (0,84), enquanto o Depth Anything V2, ligeiramente pior como professor (0,97), gerou o melhor aluno (0,91). A ordem se inverte, o que indica que a qualidade do professor no domínio de avaliação não é o fator determinante.
 
 ]

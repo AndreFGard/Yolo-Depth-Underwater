@@ -9,9 +9,23 @@
   /*
   // TODO
   - Produzir um diagrama do modelo e explicação da arquitetura.
-  - explicar a loss, particularmente que ela é robusta à escala
   - explicar exatamente o processo de calibração
   */
+
+  === Função de perda de profundidade
+
+  No ajuste fino, o YOLO26n-Depth usa o critério `DepthLoss26` da Ultralytics @yolodepth. A função combina o erro logarítmico invariante à escala (SILog) @eigen com a correspondência entre gradientes espaciais. Com os pesos padrão `dlog = 1,0` e `dgrad = 0,5`, a perda para um lote de $B$ imagens é
+  $ L = B (L_"SILog" + 0.5 L_"grad"). $
+
+  Quando necessário, a predição é redimensionada por interpolação bilinear para a resolução do rótulo. São válidos os pixels com profundidade de referência maior que 0,001. A predição recebe um piso de 0,001 antes do logaritmo. Lotes com menos de dez pixels válidos têm perda zero.
+
+  *SILog.* Para cada pixel válido $i$, o resíduo $e_i = ln(hat(z)_i) - ln(z_i)$ é a diferença entre os logaritmos da profundidade predita e do rótulo. Com a média $m$ e a variância $op("Var")(e)$ calculadas sobre todos os pixels válidos do lote, o termo é
+  $ L_"SILog" = sqrt(op("Var")(e) + (1 - lambda) m^2 + 10^(-6)). $
+  Com $lambda = 1$ (padrão de `dlam`), resta a variância dos resíduos sob a raiz, mais a constante de estabilidade numérica. Acima do piso usado no logaritmo, multiplicar todas as predições do lote por um mesmo fator $c > 0$ soma $ln(c)$ a cada resíduo. A centralização pela média cancela essa constante. Fatores distintos por imagem podem alterar a variância do lote.
+
+  *Gradientes.* O termo $L_"grad"$ usa diferenças de log-profundidade entre pixels vizinhos nas direções horizontal e vertical. Para cada direção, calculamos o erro absoluto médio entre as diferenças da predição e as do rótulo. Pares com um pixel inválido contribuem com zero. Somamos esses erros em até quatro resoluções, reduzindo os mapas em blocos de $2 times 2$ pela média dos pixels válidos. Acima do piso numérico, um fator de escala uniforme por imagem gera um deslocamento nos logaritmos que se cancela nas diferenças. Assim, o termo favorece a preservação dos contornos e das variações locais de profundidade.
+
+  A perda permite usar a estrutura dos mapas relativos do USOD10K e do Depth Anything V2 como supervisão. A calibração posterior do checkpoint usa os rótulos do conjunto de validação, conforme descrito na seção de Experimentos.
 
   == UniDepth V2
 

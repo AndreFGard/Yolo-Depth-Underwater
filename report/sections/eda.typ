@@ -14,7 +14,7 @@
 }
 
 #let eda = [
-  = Análise Exploratória dos Dados
+  = Análise Exploratória dos Dados <sec:eda>
 
   Esta seção descreve os dois conjuntos de dados usados no projeto: o USOD10K, usado para o ajuste fino e a avaliação interna,
   e o FLSea, usado como teste fora da distribuição de treino. Todas as estatísticas foram obtidas no notebook de EDA do repositório.

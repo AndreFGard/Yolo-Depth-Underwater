@@ -19,7 +19,7 @@
   $ "RMSE" = sqrt(frac(1, N) sum_i (hat(z)_i - z_i)^2) $
 
   === $delta^1$
-  _*Threshold accuracy*_ (*$delta^1$*) é uma das métricas mais amplamente utilizadas no campo @eigen @synthetic_bench_zijie e mede a porcentagem de pontos que distam do ground truth dentro de uma tolerância: a porcentagem de pixels que satisfazem $max(z_i, hat(z)_i) < 1.25 min(z_i, hat(z)_i)$.
+  _*Threshold accuracy*_ (*$delta^1$*) é uma das métricas mais amplamente utilizadas no campo @eigen@synthetic_bench_zijie e mede a porcentagem de pontos que distam do ground truth dentro de uma tolerância: a porcentagem de pixels que satisfazem $max(z_i, hat(z)_i) < 1.25 min(z_i, hat(z)_i)$.
 
   === Silog
   A *Silog* é a RMSE trasladada para o espaço logarítmico e corrigida da escala. Com $g_i = ln hat(z)_i - ln z_i$ e $m$ a média dos resíduos,
@@ -32,7 +32,7 @@
 
   Fizemos três _finetunes_ do YOLO26n-Depth com as imagens do USOD10K e o mesmo split original do dele, com 7.178 imagens de treino, 2.051 de validação e 1.026 de teste. Fizemos dois datasets com as imagens do USOD10K, mas com os mapas de profundidade produzidos por um modelo professor cada, o Depth Anything V2 (ViT-L)@depthanythingv2 e o Unidepth V2@unidepthv2, com o terceiro finetuning sendo feito inteiramente com o USOD10K original. Assim, referimo-nos a esses modelos como YOLO-DA, YOLO-Unidepth e YOLO-USOD, respectivamente.
 
-  Só os mapas mudaram entre as execuções, e todos foram convertidos para profundidade relativa, para possibilitar o treinamento. Devido a restrições computacionais, não fizemos uma tunagem de hiperparâmetros, respeitando os padrões estabelecidos pela biblioteca dos desenvolvedored do YOLO. Foram usadas 80 épocas, imagens em 640 px, _mini-batch_ de 16, backbone congelado (os 11 primeiros módulos@yolodepth), warmup de 3 épocas e decaimento linear. Também usamos o AdamW, com taxa de aprendizagem inicial de 0,002, o padrão.
+  Só os mapas mudaram entre as execuções, e garantimos que todos codificassem profundidade relativa, para possibilitar o treinamento. Devido a restrições computacionais, não fizemos uma tunagem de hiperparâmetros, respeitando os padrões estabelecidos pela biblioteca dos desenvolvedored do YOLO. Foram usadas 80 épocas, imagens em 640 px, _mini-batch_ de 16, backbone congelado (os 11 primeiros módulos@yolodepth), warmup de 3 épocas e decaimento linear. Também usamos o AdamW, com taxa de aprendizagem inicial de 0,002, o padrão.
 
   === Rótulos e conversões
   Para adequar os mapas de profundidade à profundidade relativa ou métrica exigida pela modelagem do YOLO, foi necessário adotar um método de conversão para os modelos que não produziam mapas nativamente neste formato.
@@ -59,7 +59,7 @@
 
   == Protocolo de avaliação
 
-  Devido à ambiguidade intrínseca da escala da profundidade e à variedade de modelos utilizados, optamos por um sistema de avaliação flexível, em que cada predição passa por três alinhamentos alternativos, e as métricas são calculadas sobre cada uma. No caso do _raw_, apenas os modelos de profundidade métrica são considerados, incluindo o YOLO Baseline e o YOLO-Unidepth, com a sua calibração predefinida obtida durante o seu treinamento original.
+  Devido à ambiguidade intrínseca da escala da profundidade e à variedade de modelos utilizados, optamos por um sistema de avaliação flexível, em que cada predição passa por três alinhamentos alternativos, e as métricas são calculadas sobre cada uma. No protocolo raw, avaliamos apenas modelos com saída em escala métrica, sem alinhar as predições à referência de cada quadro do FLSea-VI. O YOLO Baseline usa a calibração do checkpoint público, enquanto o YOLO-UniDepth usa a calibração ajustada no conjunto de validação do ajuste fino e armazenada no checkpoint selecionado.
 
   A avaliação externa usa o FLSea-VI, conforme explicado. Avaliamos as 6 sequências usadas por @synthetic_bench_zijie, resultando em 120 quadros. Dessa maneira, todos os modelos são avaliados no FLSea de forma _zero-shot_, enquanto os efeitos do finetuning do YOLO com os rótulos sintéticos podem ser avaliados com dados reais e de alta qualidade quanto ao ganho de capacidade fora do seu domínio de treino.
 
@@ -76,8 +76,8 @@
 
   Com esse protocolo, avaliamos quatro modelos sem nenhum treino ou ajuste no FLSea, com seus pesos oficiais: o UniDepth V2 (ViT-L), o Depth Anything V2 Large (ViT-L) usados em @synthetic_bench_zijie, o YOLO26n-Depth baseline e o UDepth-RMI.
 
-  == Estudo do efeito do ajuste fino época a época
+  == Estudo do efeito do finetune o época a época
 
-  Para entender o efeito do finetune ao longo do treinamento, fazemos, posteriormente ao seu treino, avaliações dos seus passos intermediários. Os pesos são salvos a cada duas épocas, e pontuamos no FLSea 25 destes pontos, aproximadamente a cada duas épocas, e comparamos cada ponto com o baseline. A leitura principal usa o SSI e a mediana, que removem a escala. Incluímos no mesmo estudo a $delta^1$ de validação registrada durante o treino, que mostra a especialização ao domínio de treinamento.
+  Para entender o efeito do finetune ao longo do treinamento, fazemos, posteriormente ao seu treino, avaliações dos seus passos intermediários. Os pesos são salvos a cada duas épocas, e pontuamos no FLSea 25 destes pontos, aproximadamente a cada duas épocas, e comparamos cada ponto com o baseline. A leitura principal usa o SSI e a mediana, que removem a escala, e incluímos também a $delta^1$ de validação registrada durante o treino, que mostra a especialização ao domínio de treinamento.
 
 ]

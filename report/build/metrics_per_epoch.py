@@ -6,7 +6,7 @@ px.defaults.height = 600  # type: ignore
 px.defaults.width = 800  # type: ignore
 
 LADDERS = {
-    "YOLO-DA": "artifacts/flsea_ladder_DA-headneck-80.csv",
+    "YOLO-DA": "artifacts/flsea_ladder_DA_LARGE.csv",
     "YOLO-UniDepth": "artifacts/flsea_ladder_unidepth-headneck-80.csv",
     "YOLO-USOD": "artifacts/flsea_ladder_usodk10_frozen_80.csv",
 }

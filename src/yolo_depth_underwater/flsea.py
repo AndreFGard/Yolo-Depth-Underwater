@@ -34,6 +34,9 @@ from yolo_depth_underwater.encoding import write_csv
 
 LOGGER = logging.getLogger(__name__)
 
+CACHE_EVERY = 25
+"""Write a partial Kaggle listing every this many pages so it can be resumed."""
+
 HANDLE = "viseaonlab/flsea-vi"
 DATASET_VERSION = 5  # version used for the reported numbers (informational)
 
@@ -98,9 +101,6 @@ class FLSeaFrame:
         return f"{self.sequence}/depth/{self.frame_id}_SeaErra_abs_depth.tif"
 
 
-# --------------------------------------------------------------------------- manifest
-
-
 def read_manifest(
     path: str | Path, sequences: tuple[str, ...] | list[str] | None = None
 ) -> list[FLSeaFrame]:
@@ -121,9 +121,6 @@ def write_manifest(frames: list[FLSeaFrame], path: str | Path) -> None:
     )
 
 
-# --------------------------------------------------------------------------- selection
-
-
 def _is_rate_limited(exc: Exception) -> bool:
     response = getattr(exc, "response", None)
     return getattr(response, "status_code", None) == 429 or "429" in str(exc)
@@ -141,19 +138,31 @@ def list_remote_files(
     so pages are paced and retried with backoff. The result is cached as JSON.
     You only need this to build a *new* manifest, not to reuse the committed one.
     """
-    if cache is not None and Path(cache).exists():
-        return json.loads(Path(cache).read_text())
+    cache_path = Path(cache) if cache is not None else None
+    names: list[str] = []
+    token: str | None = None
+    if cache_path is not None and cache_path.exists():
+        cached = json.loads(cache_path.read_text())
+        if isinstance(cached, list):
+            return cached
+        names = list(cached["files"])
+        token = cached.get("next_page_token")
+        if not token:
+            return names
+        LOGGER.info("resuming the listing after %d cached files", len(names))
 
     from kaggle.api.kaggle_api_extended import KaggleApi
 
     api = KaggleApi()
     api.authenticate()
 
-    def fetch(token: str | None):
+    def fetch(page_token: str | None):
         for attempt in range(8):
             try:
-                return api.dataset_list_files(HANDLE, page_token=token, page_size=page_size)
-            except Exception as exc:  # noqa: BLE001 - kaggle raises several types
+                return api.dataset_list_files(
+                    HANDLE, page_token=page_token, page_size=page_size
+                )
+            except Exception as exc:
                 if not _is_rate_limited(exc):
                     raise
                 wait = min(60, 5 * 2**attempt)
@@ -161,23 +170,50 @@ def list_remote_files(
                 time.sleep(wait)
         raise RuntimeError("Kaggle API rate limit persisted")
 
-    names: list[str] = []
-    token: str | None = None
+    pages = 0
     while True:
         res = fetch(token)
         names += [f.name for f in res.files]
-        token = getattr(res, "next_page_token", None) or getattr(res, "nextPageToken", None)
+        token = getattr(res, "next_page_token", None) or getattr(
+            res, "nextPageToken", None
+        )
+        pages += 1
+        if cache_path is not None and (pages % CACHE_EVERY == 0 or not token):
+            cache_path.parent.mkdir(parents=True, exist_ok=True)
+            cache_path.write_text(
+                json.dumps({"files": names, "next_page_token": token})
+            )
         if not token:
             break
+        if pages % CACHE_EVERY == 0:
+            LOGGER.info("%d files listed", len(names))
         time.sleep(pause)
-    if cache is not None:
-        Path(cache).write_text(json.dumps(names))
     return names
 
 
 def _frame_id(path: str) -> str | None:
     match = _ID_RE.match(path.rsplit("/", 1)[-1])
     return match.group(1) if match else None
+
+
+def sequence_frames(
+    names: list[str], sequence: str, count: int, start: int = 0, stride: int = 1
+) -> list[FLSeaFrame]:
+    """Pick ``count`` frames of ``sequence`` that are consecutive in time."""
+    imgs = {_frame_id(x) for x in names if x.startswith(f"{sequence}/imgs/")}
+    depth = {_frame_id(x) for x in names if x.startswith(f"{sequence}/depth/")}
+    common = sorted((imgs & depth) - {None}, key=int)
+    picked = common[start : start + count * stride : stride][:count]
+    if len(picked) < count:
+        LOGGER.warning(
+            "%s: only %d of the %d requested frames are available (start=%d, stride=%d)",
+            sequence,
+            len(picked),
+            count,
+            start,
+            stride,
+        )
+    return [FLSeaFrame(sequence, fid) for fid in picked]
 
 
 def pick_frames(names: list[str], sequence: str, n: int) -> list[FLSeaFrame]:
@@ -192,14 +228,13 @@ def pick_frames(names: list[str], sequence: str, n: int) -> list[FLSeaFrame]:
     return [FLSeaFrame(sequence, common[i]) for i in idx]
 
 
-# --------------------------------------------------------------------------- files
-
-
 def attach_local_root(frames: list[FLSeaFrame], root: str | Path) -> list[FLSeaFrame]:
     """Point frames at a local copy of the dataset (e.g. ``/kaggle/input/flsea-vi``)."""
     root = Path(root)
     out = [
-        replace(fr, image_path=root / fr.image_remote, depth_path=root / fr.depth_remote)
+        replace(
+            fr, image_path=root / fr.image_remote, depth_path=root / fr.depth_remote
+        )
         for fr in frames
     ]
     for fr in out:
@@ -210,13 +245,10 @@ def attach_local_root(frames: list[FLSeaFrame], root: str | Path) -> list[FLSeaF
 
 
 def _cached_path(remote: str) -> Path | None:
-    """Path of ``remote`` in the kagglehub cache, if it is already there.
-
-    kagglehub asks the Kaggle API even for files it already has, which hits HTTP 429
-    when the same frames are evaluated again (second model, second run). Looking at
-    the cache first avoids those requests.
-    """
-    cache = Path(os.environ.get("KAGGLEHUB_CACHE") or Path.home() / ".cache" / "kagglehub")
+    """Path of ``remote`` in the kagglehub cache, if it is already there."""
+    cache = Path(
+        os.environ.get("KAGGLEHUB_CACHE") or Path.home() / ".cache" / "kagglehub"
+    )
     path = cache / "datasets" / HANDLE / "versions" / str(DATASET_VERSION) / remote
     return path if path.is_file() and path.stat().st_size > 0 else None
 
@@ -224,12 +256,7 @@ def _cached_path(remote: str) -> Path | None:
 def download_frames(
     frames: list[FLSeaFrame], workers: int = 2, tries: int = 8
 ) -> list[FLSeaFrame]:
-    """Download the image and reference of each frame with ``kagglehub``.
-
-    Files already in the kagglehub cache are used as they are (no API request). Frames that fail
-    after ``tries`` attempts are logged and left out of the result. Keep ``workers``
-    low: every file costs one API request and Kaggle answers 429 when it is too fast.
-    """
+    """Download the image and reference of each frame with ``kagglehub``."""
     import kagglehub
 
     def fetch_one(remote: str) -> Path | None:
@@ -254,18 +281,22 @@ def download_frames(
         results = list(pool.map(fetch_frame, frames))
     ok = [r for r in results if r is not None]
     if len(ok) < len(frames):
-        LOGGER.warning("%d of %d frames could not be downloaded", len(frames) - len(ok), len(frames))
+        LOGGER.warning(
+            "%d of %d frames could not be downloaded",
+            len(frames) - len(ok),
+            len(frames),
+        )
     return ok
 
 
 def load_frame(frame: FLSeaFrame) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(image, depth)``: BGR ``uint8`` image and ``float32`` depth in meters
-    (invalid pixels NaN or <= 0; see ``metrics.valid_mask``).
-
-    Do not use ``cv2.imread`` for the depth file: use this loader.
+    (invalid pixels NaN or <= 0; see ``metrics.valid_mask``). Use this instead of any other loader for FLSea frames.
     """
     if frame.image_path is None or frame.depth_path is None:
-        raise ValueError("frame has no local paths: use download_frames or attach_local_root")
+        raise ValueError(
+            "frame has no local paths: use download_frames or attach_local_root"
+        )
     import tifffile
 
     img = tifffile.imread(frame.image_path)[..., :3]

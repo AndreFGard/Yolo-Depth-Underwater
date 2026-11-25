@@ -16,7 +16,7 @@ OUTPUT = ROOT / "report" / "tables" / "finetuned_models_on_flsea.csv"
 BASELINE = "yolo_baseline_evaluation_flsea.csv"
 CHECKPOINT = "best"
 RUNS = (
-    ("YOLO-DA", "flsea_ladder_DA-headneck-80.csv", False),
+    ("YOLO-DA", "flsea_ladder_DA_LARGE.csv", False),
     ("YOLO-USOD", "flsea_ladder_usodk10_frozen_80.csv", False),
     ("YOLO-UniDepth", "flsea_ladder_unidepth-headneck-80.csv", True),
 )

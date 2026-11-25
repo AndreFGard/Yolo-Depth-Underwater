@@ -92,6 +92,14 @@ class YoloModel(inference_model.InferenceModel):
             raise RuntimeError(f"{self._checkpoint} has no depth-head calibration")
         return _scalar(head.cal_a), _scalar(head.cal_b)
 
+    def set_calibration(self, cal_a: float, cal_b: float) -> None:
+        """Overwrite the ``cal_a``/``cal_b`` buffers applied in eval mode."""
+        head = depth_head(self._model.model)
+        if head is None:
+            raise RuntimeError(f"{self._checkpoint} has no depth-head calibration")
+        head.cal_a.fill_(cal_a)
+        head.cal_b.fill_(cal_b)
+
     def predict(self, images: Iterator[np.ndarray]) -> Iterator[np.ndarray]:
         return (self._predict_image(image) for image in images)
 

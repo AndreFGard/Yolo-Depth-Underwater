@@ -2,6 +2,6 @@ Métrica,Baseline,YOLO-DA,YOLO-USOD,YOLO-UniDepth
 raw AbsRel↓,0.27,—,—,0.37
 raw δ₁↑,0.39,—,—,0.50
 SSI AbsRel↓,0.11,0.10,0.11,0.14
-SSI δ₁↑,0.90,0.91,0.88,0.84
+SSI δ₁↑,0.90,0.90,0.88,0.84
 Mediana AbsRel↓,0.13,0.15,0.16,0.17
-Mediana δ₁↑,0.81,0.77,0.75,0.73
+Mediana δ₁↑,0.81,0.76,0.75,0.73

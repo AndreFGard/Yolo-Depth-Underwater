@@ -5,7 +5,7 @@ px.defaults.height = 600  # type: ignore
 px.defaults.width = 800  # type: ignore
 
 RESULTS = {
-    "YOLO-DA": "artifacts/da_headneck_80_training_results.csv",
+    "YOLO-DA": "artifacts/da_large_80_training_results.csv",
     "YOLO-UniDepth": "artifacts/unidepth_headneck_80_training_results.csv",
     "YOLO-USOD": "artifacts/usodk10_frozen_80_training_results.csv",
 }

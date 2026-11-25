@@ -18,7 +18,7 @@ LOCAL_ROOT = Path("/guaxim/.cache/kagglehub/datasets/viseaonlab/flsea-vi/version
 DEVICE = "cuda"
 BASELINE_WEIGHTS = "yolo26n-depth.pt"
 CHECKPOINT_FILES = (
-     [f"epoch{e}.pt" for e in (2, 4, 6, 8, 12, 16, 20, 24,28, 32,36, 40, 44, 48,52,56,60, 64,68,72,76, 78)]
+     [f"epoch{e}.pt" for e in (2, 4, 6, 8, 12, 16, 20, 24,28, 32,36, 40, 44, 48,52,56,60, 64,68,72,76, 78)] 
     #[f"epoch{e}.pt" for e in (2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 78)]
     + ["best.pt", "last.pt"]
 )
@@ -78,9 +78,6 @@ def main(argv: list[str] | None = None) -> int:
         frames = frames[: args.max_frames]
 
     all_rows: list[dict] = []
-    if out.exists():
-        print(f"overwriting {out}: resume disabled, scoring every checkpoint fresh")
-
     ladder = [("baseline", None)] + [(Path(f).stem, f) for f in CHECKPOINT_FILES]
     for label, filename in ladder:
         weight = (
@@ -91,11 +88,13 @@ def main(argv: list[str] | None = None) -> int:
         if not weight.is_file():
             LOGGER.warning("skip %s/%s: missing %s", name, label, weight)
             continue
+
         rows, _ = evaluation.evaluate_model(
             YoloModel(None, str(weight), DEVICE), frames
         )
         if not rows or "ssi" not in {r["alignment"] for r in rows}:
             raise SystemExit(f"{name}/{label}: eval produced no usable rows")
+
         meta = _checkpoint_meta_and_provenance(weight)
         if filename is None:
             meta["epoch"], meta["step"] = 0, 0
@@ -103,7 +102,8 @@ def main(argv: list[str] | None = None) -> int:
             meta["epoch"] = int(label.removeprefix("epoch"))
         elif label == "last" and meta["epoch"] < 0 and meta["total_epochs"] > 0:
             meta["epoch"] = meta["total_epochs"]
-        del meta["total_epochs"]
+        meta.pop("total_epochs")
+
         for row in rows:
             row.update({"run": name, "checkpoint": label, **meta})
         all_rows.extend(rows)
@@ -113,6 +113,8 @@ def main(argv: list[str] | None = None) -> int:
         print(
             f"{name}/{label}: {ssi_n} frames -> {out} (ssi AbsRel={ssi_abs / ssi_n:.4f})"
         )
+
+        # avoids oom, the files are large.
         try:
             import gc
 

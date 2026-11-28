@@ -42,7 +42,14 @@
   O desvio entre imagens é grande (R ≈ 41), o que indica condições de água muito variadas.
 
   #figure(
-    csv-table("../tables/eda_usod_color.csv", (auto,) * 8, (left,) + (center,) * 7),
+    csv-table(
+      "../tables/eda_usod_color.csv",
+      (1fr,) + (1.6fr,) * 5 + (1fr,) * 2,
+      (left,) + (center,) * 7,
+      bordered: true,
+    ),
+    placement: bottom,
+    scope: "parent",
     caption: [Estatísticas de cor do USOD10K (média ± desvio entre imagens, escala 0–255; 400 imagens por split).],
   ) <tab:usod-color>
 
@@ -77,7 +84,14 @@
   de bordas finas.
 
   #figure(
-    csv-table("../tables/eda_usod_labels.csv", (auto,) * 7, (left,) + (center,) * 6),
+    csv-table(
+      "../tables/eda_usod_labels.csv",
+      (1fr, 1fr, 1fr, 2fr, 1fr, 1fr, 1.3fr),
+      (left,) + (center,) * 6,
+      bordered: true,
+    ),
+    placement: bottom,
+    scope: "parent",
     caption: [Estatísticas dos labels do USOD10K (valores uint16; faixa cheia = mín ≤ 13.200 e máx ≥ 65.400; 400 imagens por split).],
   ) <tab:usod-labels>
 

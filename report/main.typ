@@ -1,4 +1,4 @@
-#import "@preview/charged-ieee:0.1.4": ieee
+#import "vendor/charged-ieee/lib.typ": ieee
 #import "sections/objectives.typ" : objectives
 #import "sections/justificativa.typ": justificativa
 #import "sections/modelos.typ": modelos

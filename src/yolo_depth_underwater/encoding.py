@@ -35,14 +35,14 @@ def to_uint16(depth: np.ndarray, scale: float = DEPTH_SCALE) -> np.ndarray:
 
 
 def save_depth_png(
-    path: str | Path, depth: np.ndarray, scale: float = DEPTH_SCALE
+    path: str | Path, depth: np.ndarray, scale: float = DEPTH_SCALE,warn_invalid=True
 ) -> Path:
     """Save float depth meters as a scaled uint16 PNG."""
     depth = np.asarray(depth, dtype=np.float32)
     ceiling = 65535 / scale
     too_far = np.count_nonzero(np.isfinite(depth) & (depth > ceiling))
     bad = np.count_nonzero(~np.isfinite(depth) | (depth <= 0))
-    if too_far or bad:
+    if too_far or bad and warn_invalid:
         LOGGER.warning(
             "%s: %d px above %.2f m clipped, %d px invalid set to 0 "
             "(range %.3f..%.3f m)",

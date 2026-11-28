@@ -1,0 +1,5 @@
+Métrica,Baseline,YOLO-F-GT,YOLO-F-UniDepth,YOLO-F-DA
+SSI AbsRel↓,0.108,0.098,0.093,0.096
+SSI δ₁↑,0.895,0.917,0.925,0.919
+Mediana AbsRel↓,0.134,0.117,0.115,0.129
+Mediana δ₁↑,0.811,0.866,0.869,0.853

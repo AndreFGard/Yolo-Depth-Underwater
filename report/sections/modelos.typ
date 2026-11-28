@@ -37,6 +37,5 @@
 
   O UDepth-RMI é a referência especializada em imagens subaquáticas @udepth. A entrada é no espaço RMI, que combina o canal vermelho, o máximo entre os canais verde e azul e a luminância. A luz vermelha é a primeira a se atenuar debaixo d'água, então a diferença entre o canal vermelho e o máximo de verde e azul carrega informação de profundidade, enquanto a luminância preserva o conteúdo estrutural @udepth.
 
-  O modelo foi treinado de forma supervisionada nos pares RGB-D do USOD10K @udepth, então sua saída vive na mesma escala, não métrica, dos rótulos desse conjunto, com a saída tratada como disparidade inversa relativa.
-
+  O modelo foi treinado de forma supervisionada nos pares RGB-D do USOD10K @udepth, sua saída usa o mesmo formato que os rótulos do conjunto.
 ]

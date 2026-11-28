@@ -112,6 +112,35 @@ def read_depth_scale(data_yaml: Path) -> float:
     return float(match.group(1))
 
 
+def describe_copy(
+    text: str, dest: Path, note: str, depth_scale: float
+) -> str:
+    """Rewrite the provenance of a copied data.yaml so it cannot inherit stale text.
+    """
+    body = [ln for ln in text.splitlines() if not ln.lstrip().startswith("#")]
+    kept: list[str] = []
+    skipping = False
+    quoted = "'" + (note or "undocumented").replace("'", "''") + "'"
+    for line in body:
+        if line.startswith("  gt_nature:"):
+            skipping = True
+            kept.append(f"  gt_nature: {quoted}")
+            continue
+        if skipping:
+            if line.startswith("    "):
+                continue
+            skipping = False
+        kept.append(line)
+    header = [
+        f"# COCO-depth dataset: {dest.name}",
+        "# Depth maps are hardlinked from DEPTH_SOURCE, not the source dataset's labels.",
+        f"# depth_scale: {depth_scale:g} (the loader divides stored values by this)",
+        f"# semantics: {note or 'undocumented'}",
+        "",
+    ]
+    return "\n".join(header + kept) + "\n"
+
+
 def copy_metadata(
     source: Path, dest: Path, depth_source: Path, depth_scale: float, note: str
 ) -> Path:
@@ -122,7 +151,7 @@ def copy_metadata(
     )
     if count == 0:
         raise CopyError(f"no path: line in {yaml_source}")
-    (dest / "data.yaml").write_text(text)
+    (dest / "data.yaml").write_text(describe_copy(text, dest, note, depth_scale))
 
     manifest_source = source / "annotations" / "annotations.json"
     if not manifest_source.is_file():

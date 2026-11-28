@@ -23,6 +23,7 @@ import logging
 import os
 import re
 import time
+import zipfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, replace
 from enum import StrEnum
@@ -78,6 +79,12 @@ SUBSETS: dict[Subset, tuple[str, ...]] = {
         "red_sea/sub_pier",
     ),
 }
+
+TRAINING_SCENES: tuple[str, ...] = tuple(
+    s for s in SEQUENCES if s not in SUBSETS[Subset.CAI_METZLER]
+)
+"""The six sequences that no evaluation in this repo scores, so they are the only ones
+usable for training without touching the paper's zero-shot table."""
 
 _ID_RE = re.compile(r"^(\d+)")
 
@@ -196,13 +203,47 @@ def _frame_id(path: str) -> str | None:
     return match.group(1) if match else None
 
 
+def scene_frame_ids(names: list[str], sequence: str) -> list[str]:
+    """Frame ids of ``sequence`` that have both an image and a reference depth,
+    in time order (frame ids are 100 ns timestamps)."""
+    imgs = {_frame_id(x) for x in names if x.startswith(f"{sequence}/imgs/")}
+    depth = {_frame_id(x) for x in names if x.startswith(f"{sequence}/depth/")}
+    return sorted((imgs & depth) - {None}, key=int)
+
+
+def training_split(
+    names: list[str],
+    scenes: tuple[str, ...] = TRAINING_SCENES,
+    test_per_scene: int = 50,
+    val_per_scene: int = 167,
+) -> dict[str, list[FLSeaFrame]]:
+    """first frames test, then val, the rest train.
+    """
+    overlap = set(scenes) & set(SUBSETS[Subset.CAI_METZLER])
+    if overlap:
+        raise ValueError(f"scenes are in the evaluation subset: {sorted(overlap)}")
+    out: dict[str, list[FLSeaFrame]] = {"test": [], "val": [], "train": []}
+    for sequence in scenes:
+        ids = scene_frame_ids(names, sequence)
+        if len(ids) <= test_per_scene + val_per_scene:
+            raise ValueError(
+                f"{sequence} has {len(ids)} image/depth pairs, fewer than the "
+                f"{test_per_scene + val_per_scene} requested for test+val"
+            )
+        test = ids[:test_per_scene]
+        val = ids[test_per_scene : test_per_scene + val_per_scene]
+        train = ids[test_per_scene + val_per_scene :]
+        out["test"] += [FLSeaFrame(sequence, i) for i in test]
+        out["val"] += [FLSeaFrame(sequence, i) for i in val]
+        out["train"] += [FLSeaFrame(sequence, i) for i in train]
+    return out
+
+
 def sequence_frames(
     names: list[str], sequence: str, count: int, start: int = 0, stride: int = 1
 ) -> list[FLSeaFrame]:
     """Pick ``count`` frames of ``sequence`` that are consecutive in time."""
-    imgs = {_frame_id(x) for x in names if x.startswith(f"{sequence}/imgs/")}
-    depth = {_frame_id(x) for x in names if x.startswith(f"{sequence}/depth/")}
-    common = sorted((imgs & depth) - {None}, key=int)
+    common = scene_frame_ids(names, sequence)
     picked = common[start : start + count * stride : stride][:count]
     if len(picked) < count:
         LOGGER.warning(
@@ -219,9 +260,7 @@ def sequence_frames(
 def pick_frames(names: list[str], sequence: str, n: int) -> list[FLSeaFrame]:
     """Pick ``n`` frames evenly spaced in time among those that have both an image
     and a reference depth (frame ids are capture timestamps, so sorting = time)."""
-    imgs = {_frame_id(x) for x in names if x.startswith(f"{sequence}/imgs/")}
-    depth = {_frame_id(x) for x in names if x.startswith(f"{sequence}/depth/")}
-    common = sorted((imgs & depth) - {None})
+    common = scene_frame_ids(names, sequence)
     if not common:
         return []
     idx = sorted(set(np.linspace(0, len(common) - 1, n).round().astype(int)))
@@ -289,18 +328,124 @@ def download_frames(
     return ok
 
 
+_KIND_MARKERS: tuple[str, ...] = ("/imgs/", "/depth/")
+
+_SCENE_TO_SEQUENCE: dict[str, str] = {s.rsplit("/", 1)[-1]: s for s in SEQUENCES}
+"""Scene directory name -> canonical ``<site>/<scene>`` sequence. Scene names are unique
+across sites, so the same indexer serves a nested archive (``red_sea/dice_path/...``), a
+prefix above the site (``flsea-vi/red_sea/dice_path/...``) and a flattened one where the
+site directory is absent (``dice_path/...``, e.g. the per-site ``red_sea.zip``)."""
+
+
+def canonical_remote(member: str) -> str | None:
+    """Map an archive member to ``<site>/<scene>/<kind>/<file>``, or ``None`` when it is
+    neither an image nor a reference depth map."""
+    positions = [pos for pos in (member.find(k) for k in _KIND_MARKERS) if pos >= 0]
+    if not positions:
+        return None
+    position = min(positions)
+    sequence = _SCENE_TO_SEQUENCE.get(member[:position].rsplit("/", 1)[-1])
+    return None if sequence is None else f"{sequence}{member[position:]}"
+
+
+def decode_frame(
+    image: np.ndarray, depth: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Turn decoded TIFF arrays into the repo convention: BGR ``uint8`` + metres."""
+    image = np.asarray(image)[..., :3]
+    if image.dtype != np.uint8:
+        image = (image.astype(np.float32) / np.iinfo(image.dtype).max * 255).astype(
+            np.uint8
+        )
+    depth = np.asarray(depth).astype(np.float32)
+    return np.ascontiguousarray(image[..., ::-1]), depth
+
+
 def load_frame(frame: FLSeaFrame) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(image, depth)``: BGR ``uint8`` image and ``float32`` depth in meters
     (invalid pixels NaN or <= 0; see ``metrics.valid_mask``). Use this instead of any other loader for FLSea frames.
     """
     if frame.image_path is None or frame.depth_path is None:
         raise ValueError(
-            "frame has no local paths: use download_frames or attach_local_root"
+            "frame has no local paths: use download_frames, attach_local_root or "
+            "ArchiveFrames"
         )
     import tifffile
 
-    img = tifffile.imread(frame.image_path)[..., :3]
-    if img.dtype != np.uint8:
-        img = (img.astype(np.float32) / np.iinfo(img.dtype).max * 255).astype(np.uint8)
-    depth = tifffile.imread(frame.depth_path).astype(np.float32)
-    return np.ascontiguousarray(img[..., ::-1]), depth
+    return decode_frame(tifffile.imread(frame.image_path), tifffile.imread(frame.depth_path))
+
+
+class ArchiveFrames:
+    """Read FLSea frames straight out of a dataset ``.zip``, without extracting it.
+
+    The archive may keep any prefix above the scene directories (``flsea-vi/``,
+    ``versions/5/``, ...) or drop the site directory entirely (the per-site archives such as
+    ``red_sea.zip`` hold ``big_dice_loop/imgs/...``): members are indexed by their *canonical*
+    name (``<site>/<scene>/imgs/<frame_id>.tiff``), which is what the rest of this module
+    uses.
+
+    Example:
+        with ArchiveFrames.open("flsea-vi.zip") as archive:
+            split = training_split(archive.names())
+            image, depth = archive.load_frame(split["train"][0])
+    """
+
+    def __init__(self, path: Path, archive: zipfile.ZipFile, index: dict[str, str]):
+        self.path = path
+        self._archive = archive
+        self._index = index
+
+    @classmethod
+    def open(cls, path: str | Path) -> "ArchiveFrames":
+        """Open the archive and index every image/reference member by remote name."""
+        path = Path(path)
+        archive = zipfile.ZipFile(path)
+        index: dict[str, str] = {}
+        for member in archive.namelist():
+            if member.endswith("/"):
+                continue
+            remote = canonical_remote(member)
+            if remote is not None:
+                index[remote] = member
+        if not index:
+            archive.close()
+            raise ValueError(
+                f"{path} has no '<sequence>/imgs|depth/' members; "
+                f"first members: {archive.namelist()[:3]}"
+            )
+        return cls(path, archive, index)
+
+    def names(self) -> list[str]:
+        """Remote names present in the archive, comparable to a Kaggle listing."""
+        return sorted(self._index)
+
+    def sequences(self) -> dict[str, tuple[int, int]]:
+        """``sequence -> (image members, depth members)``, to check the layout at a glance."""
+        counts: dict[str, list[int]] = {}
+        for remote in self._index:
+            sequence = remote.split("/imgs/")[0] if "/imgs/" in remote else remote.split("/depth/")[0]
+            counts.setdefault(sequence, [0, 0])[0 if "/imgs/" in remote else 1] += 1
+        return {name: (imgs, depth) for name, (imgs, depth) in sorted(counts.items())}
+
+    def read(self, remote: str) -> bytes:
+        """Raw bytes of one member."""
+        return self._archive.read(self._index[remote])
+
+    def load_frame(self, frame: FLSeaFrame) -> tuple[np.ndarray, np.ndarray]:
+        """Same contract as :func:`load_frame`, reading from the archive."""
+        import io
+
+        import tifffile
+
+        image = tifffile.imread(io.BytesIO(self.read(frame.image_remote)))
+        depth = tifffile.imread(io.BytesIO(self.read(frame.depth_remote)))
+        return decode_frame(image, depth)
+
+    def close(self) -> None:
+        self._archive.close()
+
+    def __enter__(self) -> "ArchiveFrames":
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()

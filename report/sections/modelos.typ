@@ -7,7 +7,8 @@
 
   O YOLO26n-Depth é a variante nano da família de estimação monocular da Ultralytics. Com 6,3 milhões de parâmetros, combina um extrator de características convolucional, uma pirâmide de características e um decodificador do tipo _Dense Prediction Transformer_ (DPT) para produzir um mapa denso de profundidade. A calibração do checkpoint determina a escala métrica da saída @yolodepth.
 
-  O checkpoint público, pré-treinado em cerca de 2,19 milhões de imagens de cenas internas e externas, serve como referência _zero-shot_ e como ponto de partida para o ajuste fino @yolodepth. Assim, esse checkpoint será utilizado como base para o finetuning e testes deste trabalho.
+  O checkpoint público, pré-treinado em cerca de 2,19 milhões de imagens de cenas internas e externas, serve como referência _zero-shot_ e como ponto de partida para o ajuste fino @yolodepth. Assim, esse checkpoint será utilizado como base para o finetuning e testes deste trabalho
+  
   === Função de perda de profundidade
 
   No ajuste fino, o YOLO26n-Depth usa o critério `DepthLoss26` da Ultralytics @yolodepth. A função combina o erro logarítmico invariante à escala (SILog) @eigen com a correspondência entre gradientes espaciais. Com os pesos padrão `dlog = 1,0` e `dgrad = 0,5`, a perda para um lote de $B$ imagens é

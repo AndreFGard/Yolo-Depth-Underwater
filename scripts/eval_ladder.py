@@ -18,8 +18,34 @@ LOCAL_ROOT = Path("/guaxim/.cache/kagglehub/datasets/viseaonlab/flsea-vi/version
 DEVICE = "cuda"
 BASELINE_WEIGHTS = "yolo26n-depth.pt"
 CHECKPOINT_FILES = (
-     [f"epoch{e}.pt" for e in (2, 4, 6, 8, 12, 16, 20, 24,28, 32,36, 40, 44, 48,52,56,60, 64,68,72,76, 78)] 
-    #[f"epoch{e}.pt" for e in (2, 4, 6, 8, 12, 16, 24, 32, 48, 64, 78)]
+    [
+        f"epoch{e}.pt"
+        for e in (
+            2,
+            4,
+            6,
+            8,
+            12,
+            16,
+            20,
+            24,
+            28,
+            32,
+            36,
+            40,
+            44,
+            48,
+            52,
+            56,
+            58,
+            60,
+            64,
+            68,
+            72,
+            76,
+            78,
+        )
+    ]
     + ["best.pt", "last.pt"]
 )
 

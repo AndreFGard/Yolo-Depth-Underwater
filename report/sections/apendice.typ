@@ -56,8 +56,7 @@
 
   Os três ajustes superam o baseline, e o aluno treinado com os rótulos do UniDepth é o melhor dos três: 0,869 de $delta^1$ sob mediana, contra 0,811 do baseline, mas desempenho quase idêntico ao modelo ajustado com _ground truth_ e muito próximo ao YOLO-F-DA.
 
-  A @fig:flsea-arms-epoch mostra que as três curvas partem do valor do baseline, caem
-  nas primeiras épocas e se recuperam até um patamar estável por volta da 20ª à 36ª
+  A @fig:flsea-arms-epoch mostra que as três curvas partem do valor do baseline, o YOLO-F-GT sobe imediatamente, mas os outros dois caem e se recuperam até um patamar estável por volta da 20ª à 36ª
   época, mas dois dos modelos apresentam uma leve piora no restante do treinamento.
 
   Portanto, a comparação desses modelos com o YOLO-F-GT permite concluir que os professores são capazes de produzir rótulos aproximadamente tão eficientes quanto os rótulos _ground truth_, ao menos nesse domínio, além do ajuste ter promovido uma melhora considerável sobre o baseline, enfraquecendo a associação da qualidade dos rótulos sintéticos ao resultado ruim dos modelos treinados no USOD10K.

@@ -106,8 +106,7 @@
   ) <fig:usod-pairs>
 
   == FLSea
-  //TODO ajustar 6 sequencias  do @syntheticfinetuning
-  //TODO explicar a amostragem
+
   O FLSea @flsea é um conjunto de imagens e dados inerciais, gravado em cânions do
   Mediterrâneo (4–7 m de profundidade) e no Mar Vermelho (3–8 m). Usamos a parte visual-inercial (12 sequências). A referência de
   profundidade vem de fotogrametria (SfM) com escala dada por objetos de tamanho conhecido, em metros, e é esparsa, de forma que

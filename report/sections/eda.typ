@@ -48,7 +48,7 @@
       (left,) + (center,) * 7,
       bordered: true,
     ),
-    placement: top,
+    placement: bottom,
     scope: "parent",
     caption: [Estatísticas de cor do USOD10K (média ± desvio entre imagens, escala 0–255; 400 imagens por split).],
   ) <tab:usod-color>
@@ -90,7 +90,7 @@
       (left,) + (center,) * 6,
       bordered: true,
     ),
-    placement: top,
+    placement: bottom,
     scope: "parent",
     caption: [Estatísticas dos labels do USOD10K (valores uint16; faixa cheia = mín ≤ 13.200 e máx ≥ 65.400; 400 imagens por split).],
   ) <tab:usod-labels>
